@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 BASE_URL = "https://api.gratefulstats.com/deadapi/v2/"
 
 # to stay safely within the 50 calls per 5 minutes limit.
-RATE_LIMIT_DELAY = 6.5
+RATE_LIMIT_DELAY = 7
 
 def get_headers():
     api_key = os.environ.get("GRATEFUL_STATS_API_KEY")
@@ -31,7 +31,11 @@ def validate_keys():
     logging.info("Validating API keys...")
     try:
         response = requests.get(url, headers=get_headers())
-        if response.status_code == 200 and "Key Works" in response.text:
+        # Always sleep to respect rate limit for the subsequent call
+        time.sleep(RATE_LIMIT_DELAY)
+        
+        response_text = response.text.lower()
+        if response.status_code == 200 and ("key works" in response_text or "key valid" in response_text):
             logging.info("API Key validation successful!")
             return True
         else:
@@ -42,21 +46,50 @@ def validate_keys():
         logging.error(f"Validation request failed: {e}")
         return False
 
-def fetch_data(endpoint):
+def fetch_data(endpoint, max_retries=3):
+    """Fetches data from the API with rate limiting and retry logic."""
     url = BASE_URL + endpoint
-    logging.info(f"Fetching {url}...")
-    try:
-        response = requests.get(url, headers=get_headers())
-        if response.status_code != 200:
+    
+    for attempt in range(max_retries):
+        logging.info(f"Fetching {url} (Attempt {attempt + 1}/{max_retries})...")
+        try:
+            response = requests.get(url, headers=get_headers())
+            
+            # Always sleep after a request to maintain the rate limit
+            time.sleep(RATE_LIMIT_DELAY)
+            
+            if response.status_code == 200:
+                try:
+                    return response.json()
+                except ValueError:
+                    logging.error(f"Server returned non-JSON response for {url}: {response.text}")
+                    return None
+            
             logging.error(f"Error {response.status_code} for {url}")
             logging.error(f"Server response: {response.text}")
-            response.raise_for_status()
             
-        time.sleep(RATE_LIMIT_DELAY) # Built-in limit
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Request failed: {e}")
-        return None
+            # Retry logic for server errors (5xx) or Rate Limiting (429)
+            if 500 <= response.status_code < 600 or response.status_code == 429:
+                wait_time = (attempt + 1) * 10
+                if response.status_code == 429:
+                    wait_time = 60 # Wait a full minute if rate limited
+                
+                if attempt < max_retries - 1:
+                    logging.info(f"Retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+                    continue
+            
+            # For 4xx errors (except 429), we don't retry
+            return None
+            
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Request failed: {e}")
+            time.sleep(RATE_LIMIT_DELAY)
+            if attempt < max_retries - 1:
+                continue
+            return None
+            
+    return None
 
 def setup_database(db_path='grateful_dead.db'):
     """Sets up the SQLite database schema for concerts, songs, and venues."""
