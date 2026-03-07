@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 BASE_URL = "https://api.gratefulstats.com/deadapi/v2/"
 
 # to stay safely within the 50 calls per 5 minutes limit.
-RATE_LIMIT_DELAY = 6.67
+RATE_LIMIT_DELAY = 6.5
 
 def get_headers():
     api_key = os.environ.get("GRATEFUL_STATS_API_KEY")
