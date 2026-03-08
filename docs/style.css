@@ -49,7 +49,7 @@ body {
 #sidebar {
     width: 380px;
     min-width: 250px;
-    max-width: 600px;
+    max-width: 800px;
     background-color: var(--sidebar-bg);
     padding: 20px;
     box-shadow: 2px 0 10px rgba(0,0,0,0.2);
@@ -58,8 +58,14 @@ body {
     flex-direction: column;
     gap: 15px;
     overflow-y: auto;
-    transition: background-color 0.3s, transform 0.3s ease;
+    transition: background-color 0.3s, transform 0.3s ease, width 0s;
     position: relative;
+    flex-shrink: 0;
+}
+
+/* Disable transitions entirely while resizing for immediate response */
+body.resizing-active #sidebar {
+    transition: none !important;
 }
 
 .header-row {
@@ -137,21 +143,22 @@ body {
 }
 
 #sidebar-resizer {
-    width: 16px;
+    width: 6px;
     height: 100vh;
-    background: rgba(255, 255, 255, 0.01); /* Invisible but hit-testable */
-    position: absolute;
-    left: 380px;
-    top: 0;
+    background: transparent;
     cursor: col-resize;
-    z-index: 999; /* Ensure it's on top of everything */
+    z-index: 999;
+    flex-shrink: 0;
     transition: background 0.2s;
-    margin-left: -8px;
+    border-left: 1px solid var(--border-color);
+    margin-left: -3px; /* Allow centering over the boundary */
+    position: relative;
 }
 
 #sidebar-resizer:hover, #sidebar-resizer.resizing {
     background: var(--accent-color) !important;
-    opacity: 0.4 !important;
+    opacity: 0.6 !important;
+    width: 6px;
 }
 
 h2 {
@@ -271,6 +278,11 @@ li {
 #graph-container {
     flex-grow: 1;
     position: relative;
+    min-width: 0;
+}
+
+body.resizing-active #graph-container {
+    pointer-events: none;
 }
 
 /* D3 Elements */
