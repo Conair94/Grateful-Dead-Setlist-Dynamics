@@ -61,75 +61,107 @@ d3.json("data/graph_data.json").then(data => {
     updateGraph();
 });
 
-// Event Listeners
-document.getElementById('theme-toggle').addEventListener('click', () => {
-    document.body.classList.toggle('light-mode');
-    const isLight = document.body.classList.contains('light-mode');
-    // Display current state icon: Sun for light mode, Moon for dark mode
-    document.getElementById('theme-toggle').innerText = isLight ? '☀️' : '🌙';
-});
-
-document.getElementById('preset-timeline').addEventListener('change', (e) => {
-    const val = e.target.value;
-    if (val) {
-        const [start, end] = val.split('|');
-        document.getElementById('start-date').value = start;
-        document.getElementById('end-date').value = end;
-        updateGraph();
+// Event Listeners Initialization
+function initEventListeners() {
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            themeToggle.innerText = isLight ? '☀️' : '🌙';
+        });
     }
-});
 
-document.getElementById('start-date').addEventListener('change', updateGraph);
-document.getElementById('end-date').addEventListener('change', updateGraph);
-document.getElementById('segue-only').addEventListener('change', updateGraph);
-document.getElementById('graph-mode').addEventListener('change', updateGraph);
-
-document.getElementById('song-search').addEventListener('input', () => {
-    const searchTerm = document.getElementById('song-search').value.toLowerCase();
-    if (!searchTerm) {
-        clearSelection();
-        return;
+    const presetTimeline = document.getElementById('preset-timeline');
+    if (presetTimeline) {
+        presetTimeline.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val) {
+                const [start, end] = val.split('|');
+                document.getElementById('start-date').value = start;
+                document.getElementById('end-date').value = end;
+                updateGraph();
+            }
+        });
     }
-    const match = graphData.nodes.find(n => n.title.toLowerCase() === searchTerm);
-    if (match) {
-        showStats(match);
-    } else {
-        highlightNode();
+
+    ['start-date', 'end-date', 'segue-only', 'graph-mode'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', updateGraph);
+    });
+
+    const songSearch = document.getElementById('song-search');
+    if (songSearch) {
+        songSearch.addEventListener('input', () => {
+            const searchTerm = songSearch.value.toLowerCase();
+            if (!searchTerm) {
+                clearSelection();
+                return;
+            }
+            const match = graphData.nodes.find(n => n.title.toLowerCase() === searchTerm);
+            if (match) {
+                showStats(match);
+            } else {
+                highlightNode();
+            }
+        });
     }
-});
 
-document.getElementById('clear-search').addEventListener('click', () => {
-    document.getElementById('song-search').value = '';
-    clearSelection();
-});
-
-// Controls Listeners
-document.getElementById('color-mapping').addEventListener('change', updateNodeColors);
-
-document.getElementById('node-repulsion').addEventListener('input', (e) => {
-    repulsionStrength = -parseInt(e.target.value);
-    document.getElementById('repulsion-val').innerText = e.target.value;
-    if (simulation) {
-        simulation.force("charge").strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength);
-        simulation.alpha(0.3).restart();
+    const clearSearch = document.getElementById('clear-search');
+    if (clearSearch) {
+        clearSearch.addEventListener('click', () => {
+            document.getElementById('song-search').value = '';
+            clearSelection();
+        });
     }
-});
 
-document.getElementById('link-distance').addEventListener('input', (e) => {
-    linkDistance = parseInt(e.target.value);
-    document.getElementById('distance-val').innerText = linkDistance;
-    if (simulation) {
-        simulation.force("link").distance(d => d.segue ? linkDistance * 0.3 : linkDistance);
-        simulation.alpha(0.3).restart();
+    const colorMapping = document.getElementById('color-mapping');
+    if (colorMapping) {
+        colorMapping.addEventListener('change', updateNodeColors);
     }
-});
 
-document.getElementById('walk-speed').addEventListener('input', (e) => {
-    document.getElementById('speed-val').innerText = e.target.value;
-});
+    const nodeRepulsion = document.getElementById('node-repulsion');
+    const repulsionVal = document.getElementById('repulsion-val');
+    if (nodeRepulsion) {
+        nodeRepulsion.addEventListener('input', (e) => {
+            repulsionStrength = -parseInt(e.target.value);
+            if (repulsionVal) repulsionVal.textContent = e.target.value;
+            if (simulation) {
+                simulation.force("charge").strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength);
+                simulation.alpha(0.3).restart();
+            }
+        });
+    }
 
-document.getElementById('generate-random-walk').addEventListener('click', () => generateSetlistWalk(false));
-document.getElementById('generate-realistic-walk').addEventListener('click', () => generateSetlistWalk(true));
+    const linkDistanceInput = document.getElementById('link-distance');
+    const distanceVal = document.getElementById('distance-val');
+    if (linkDistanceInput) {
+        linkDistanceInput.addEventListener('input', (e) => {
+            linkDistance = parseInt(e.target.value);
+            if (distanceVal) distanceVal.textContent = linkDistance;
+            if (simulation) {
+                simulation.force("link").distance(d => d.segue ? linkDistance * 0.3 : linkDistance);
+                simulation.alpha(0.3).restart();
+            }
+        });
+    }
+
+    const walkSpeedInput = document.getElementById('walk-speed');
+    const speedValDisplay = document.getElementById('speed-val');
+    if (walkSpeedInput) {
+        walkSpeedInput.addEventListener('input', (e) => {
+            if (speedValDisplay) speedValDisplay.textContent = e.target.value;
+        });
+    }
+
+    const genRandom = document.getElementById('generate-random-walk');
+    if (genRandom) genRandom.addEventListener('click', () => generateSetlistWalk(false));
+
+    const genRealistic = document.getElementById('generate-realistic-walk');
+    if (genRealistic) genRealistic.addEventListener('click', () => generateSetlistWalk(true));
+}
+
+initEventListeners();
 
 // Sidebar Resizer Logic
 const sidebar = document.getElementById('sidebar');
