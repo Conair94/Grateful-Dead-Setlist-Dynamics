@@ -126,6 +126,73 @@ document.getElementById('link-distance').addEventListener('input', (e) => {
 document.getElementById('generate-random-walk').addEventListener('click', () => generateSetlistWalk(false));
 document.getElementById('generate-realistic-walk').addEventListener('click', () => generateSetlistWalk(true));
 
+// Sidebar Resizer Logic
+const sidebar = document.getElementById('sidebar');
+const resizer = document.getElementById('sidebar-resizer');
+const mobileToggle = document.getElementById('mobile-menu-toggle');
+const mobileClose = document.getElementById('sidebar-close');
+let isResizing = false;
+
+mobileToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle('show');
+});
+
+if (mobileClose) {
+    mobileClose.addEventListener('click', () => {
+        sidebar.classList.remove('show');
+    });
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && sidebar.classList.contains('show')) {
+        if (!sidebar.contains(e.target) && e.target !== mobileToggle) {
+            sidebar.classList.remove('show');
+        }
+    }
+});
+
+resizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    resizer.classList.add('resizing');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none'; // Prevent text selection during drag
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    
+    const newWidth = e.clientX;
+    if (newWidth >= 250 && newWidth <= 600) {
+        sidebar.style.width = `${newWidth}px`;
+        // Trigger a resize event to notify D3/SVG to adjust if needed
+        window.dispatchEvent(new Event('resize'));
+    }
+});
+
+window.addEventListener('mouseup', () => {
+    if (isResizing) {
+        isResizing = false;
+        resizer.classList.remove('resizing');
+        document.body.style.cursor = 'default';
+        document.body.style.userSelect = 'auto';
+    }
+});
+
+// Handle Window Resizing
+window.addEventListener('resize', () => {
+    const newWidth = graphContainer.clientWidth;
+    const newHeight = window.innerHeight;
+    
+    svg.attr("width", newWidth).attr("height", newHeight);
+    
+    if (simulation) {
+        simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
+        simulation.alpha(0.3).restart();
+    }
+});
+
 function updateGraph() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;

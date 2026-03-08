@@ -9,14 +9,18 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body class="light-mode">
+    <button id="mobile-menu-toggle" aria-label="Open Menu">☰</button>
     <div id="sidebar">
         <div class="header-row">
             <h2>Grateful Dead Setlist Dynamics</h2>
-            <button id="theme-toggle" title="Toggle Theme">🌙</button>
+            <div class="header-buttons">
+                <button id="theme-toggle" title="Toggle Theme">🌙</button>
+                <button id="sidebar-close" class="mobile-only" aria-label="Close Menu">✕</button>
+            </div>
         </div>
 
         <details class="ui-section">
-            <summary>About & Instructions</summary>
+... (rest of the file) ...
             <div class="section-content" style="font-size: 0.85rem; line-height: 1.4;">
                 <p style="margin-top: 0; margin-bottom: 8px;"><strong>About:</strong> This interactive visualization explores the setlist dynamics of the Grateful Dead. It maps how songs transition into one another, allowing you to trace historical patterns, identify common pairings, and even simulate realistically generated setlists based on different eras of the band's 30-year history.</p>
                 <p style="margin-top: 0;"><strong>Timeframe Filter:</strong> Adjust the dates to recalculate connections based on that specific era.</p>
@@ -96,8 +100,8 @@
                 <div class="control-group">
                     <label for="graph-mode">Graph Display</label>
                     <select id="graph-mode">
-                        <option value="raw" selected>Raw Display (All sets combined)</option>
-                        <option value="detailed">Detailed Display (Partitioned by set)</option>
+                        <option value="raw">Raw Display (All sets combined)</option>
+                        <option value="detailed" selected>Detailed Display (Partitioned by set)</option>
                     </select>
                 </div>
                 <div class="control-group">
@@ -151,6 +155,7 @@
                 <ul id="stat-next"></ul>
             </div>
         </div>
+        <div id="sidebar-resizer"></div>
     </div>
 
     <div id="graph-container"></div>
