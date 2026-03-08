@@ -65,6 +65,7 @@ d3.json("data/graph_data.json").then(data => {
 document.getElementById('theme-toggle').addEventListener('click', () => {
     document.body.classList.toggle('light-mode');
     const isLight = document.body.classList.contains('light-mode');
+    // If light mode, show moon (to go dark). If dark mode, show sun (to go light).
     document.getElementById('theme-toggle').innerText = isLight ? '🌙' : '☀️';
 });
 
