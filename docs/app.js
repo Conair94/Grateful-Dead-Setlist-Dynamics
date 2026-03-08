@@ -216,11 +216,11 @@ function updateGraph() {
             
             if (rawNode.type === 'special') {
                 nodeObj.type = 'special';
-                // Spread nodes far apart
-                if (nodeId === 'START') { nodeObj.fx = width * -0.5; nodeObj.fy = height / 2; }
-                else if (nodeId === 'SET_BREAK') { nodeObj.fx = width * 0.5; nodeObj.fy = height / 2; }
-                else if (nodeId === 'ENCORE_BREAK') { nodeObj.fx = width * 1.5; nodeObj.fy = height / 2; }
-                else if (nodeId === 'END') { nodeObj.fx = width * 2.5; nodeObj.fy = height / 2; }
+                // Provide initial starting positions to orient the graph, but leave them unfixed
+                if (nodeId === 'START') { nodeObj.x = width * -0.5; nodeObj.y = height / 2; }
+                else if (nodeId === 'SET_BREAK') { nodeObj.x = width * 0.5; nodeObj.y = height / 2; }
+                else if (nodeId === 'ENCORE_BREAK') { nodeObj.x = width * 1.5; nodeObj.y = height / 2; }
+                else if (nodeId === 'END') { nodeObj.x = width * 2.5; nodeObj.y = height / 2; }
             } else {
                 // Set probability calc
                 let s1 = nodeSetStats[nodeId] ? nodeSetStats[nodeId].set1 : 0;
