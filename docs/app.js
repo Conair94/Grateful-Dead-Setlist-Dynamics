@@ -124,6 +124,10 @@ document.getElementById('link-distance').addEventListener('input', (e) => {
     }
 });
 
+document.getElementById('walk-speed').addEventListener('input', (e) => {
+    document.getElementById('speed-val').innerText = e.target.value;
+});
+
 document.getElementById('generate-random-walk').addEventListener('click', () => generateSetlistWalk(false));
 document.getElementById('generate-realistic-walk').addEventListener('click', () => generateSetlistWalk(true));
 
@@ -606,6 +610,7 @@ function highlightNode() {
 
 // Markov Chain Generator
 async function generateSetlistWalk(enforceRealisticRules = false) {
+    const walkDuration = parseInt(document.getElementById('walk-speed').value) || 800;
     document.getElementById('generated-setlist-output').classList.remove('hidden');
     const ul = document.getElementById('generated-list');
     ul.innerHTML = ''; // clear previous
@@ -712,13 +717,13 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
                 .translate(-nextNode.x, -nextNode.y); // Move to node
 
             svg.transition()
-                .duration(800)
+                .duration(walkDuration)
                 .ease(d3.easeCubicInOut)
                 .call(zoom.transform, transform);
 
             // Move walker dot
             walker.transition()
-                .duration(800)
+                .duration(walkDuration)
                 .ease(d3.easeCubicInOut)
                 .attr("cx", nextNode.x)
                 .attr("cy", nextNode.y)
