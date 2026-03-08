@@ -7,6 +7,10 @@ let svg, container;
 let nodeElements, linkElements, labelElements;
 let selectedNode = null; // Track currently selected node
 
+// Physics parameters
+let repulsionStrength = -300;
+let linkDistance = 100;
+
 // Set up SVG
 const graphContainer = document.getElementById('graph-container');
 const width = graphContainer.clientWidth;
@@ -58,6 +62,12 @@ d3.json("data/graph_data.json").then(data => {
 });
 
 // Event Listeners
+document.getElementById('theme-toggle').addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    document.getElementById('theme-toggle').innerText = isLight ? '🌙' : '☀️';
+});
+
 document.getElementById('preset-timeline').addEventListener('change', (e) => {
     const val = e.target.value;
     if (val) {
@@ -67,36 +77,62 @@ document.getElementById('preset-timeline').addEventListener('change', (e) => {
         updateGraph();
     }
 });
+
 document.getElementById('start-date').addEventListener('change', updateGraph);
 document.getElementById('end-date').addEventListener('change', updateGraph);
 document.getElementById('segue-only').addEventListener('change', updateGraph);
+
 document.getElementById('song-search').addEventListener('input', () => {
     const searchTerm = document.getElementById('song-search').value.toLowerCase();
     if (!searchTerm) {
         clearSelection();
         return;
     }
-    
-    // Find the exact node if possible
     const match = graphData.nodes.find(n => n.title.toLowerCase() === searchTerm);
     if (match) {
         showStats(match);
     } else {
-        highlightNode(); // Fallback to partial highlighting
+        highlightNode();
     }
 });
+
 document.getElementById('clear-search').addEventListener('click', () => {
     document.getElementById('song-search').value = '';
     clearSelection();
 });
+
+// Controls Listeners
+document.getElementById('color-mapping').addEventListener('change', updateNodeColors);
+
+document.getElementById('node-repulsion').addEventListener('input', (e) => {
+    repulsionStrength = -parseInt(e.target.value);
+    document.getElementById('repulsion-val').innerText = e.target.value;
+    if (simulation) {
+        simulation.force("charge").strength(repulsionStrength);
+        simulation.alpha(0.3).restart();
+    }
+});
+
+document.getElementById('link-distance').addEventListener('input', (e) => {
+    linkDistance = parseInt(e.target.value);
+    document.getElementById('distance-val').innerText = linkDistance;
+    if (simulation) {
+        simulation.force("link").distance(d => d.segue ? linkDistance * 0.3 : linkDistance);
+        simulation.alpha(0.3).restart();
+    }
+});
+
+document.getElementById('generate-setlist').addEventListener('click', generateSetlistWalk);
 
 function updateGraph() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
     const segueOnly = document.getElementById('segue-only').checked;
     
-    selectedNode = null; // Clear selection on data change
+    selectedNode = null;
     container.classed('has-selection', false);
+    document.getElementById('stats-placeholder').classList.remove('hidden');
+    document.getElementById('stats-content').classList.add('hidden');
 
     // Filter edges based on date and segue
     let filteredEdges = rawEdges.filter(e => {
@@ -110,6 +146,7 @@ function updateGraph() {
     // Aggregate edges to get weights
     let edgeCounts = {};
     let nodeDegrees = {};
+    let nodeSetStats = {};
     
     filteredEdges.forEach(e => {
         const key = e.source + "|||" + e.target;
@@ -120,6 +157,18 @@ function updateGraph() {
         
         nodeDegrees[e.source] = (nodeDegrees[e.source] || 0) + 1;
         nodeDegrees[e.target] = (nodeDegrees[e.target] || 0) + 1;
+
+        // Track Set Info
+        if (e.target !== 'END' && e.target !== 'SET_BREAK' && e.target !== 'START') {
+            if (!nodeSetStats[e.target]) nodeSetStats[e.target] = { set1: 0, set2plus: 0 };
+            if (e.set === 1) nodeSetStats[e.target].set1 += 1;
+            else nodeSetStats[e.target].set2plus += 1;
+        }
+        if (e.source !== 'END' && e.source !== 'SET_BREAK' && e.source !== 'START') {
+            if (!nodeSetStats[e.source]) nodeSetStats[e.source] = { set1: 0, set2plus: 0 };
+            if (e.set === 1) nodeSetStats[e.source].set1 += 1;
+            else nodeSetStats[e.source].set2plus += 1;
+        }
     });
 
     // We only want nodes that are active in this timeframe (degree > 0), plus our special nodes
@@ -127,9 +176,16 @@ function updateGraph() {
     
     rawNodes.forEach(n => {
         if (nodeDegrees[n.id] > 0 || n.type === 'special') {
-            // Create a copy for the simulation
             let nodeObj = { ...n, degree: nodeDegrees[n.id] || 0 };
             
+            // Set probability calc
+            let s1 = nodeSetStats[n.id] ? nodeSetStats[n.id].set1 : 0;
+            let s2 = nodeSetStats[n.id] ? nodeSetStats[n.id].set2plus : 0;
+            let total = s1 + s2;
+            nodeObj.set1Plays = s1;
+            nodeObj.set2Plays = s2;
+            nodeObj.setRatio = total > 0 ? s1 / total : 0.5; // 1 = only set 1, 0 = only set 2+
+
             // Fix positions of special nodes
             if (n.id === 'START') {
                 nodeObj.fx = width * 0.1;
@@ -146,7 +202,6 @@ function updateGraph() {
         }
     });
 
-    // Re-map edges to object references required by D3
     let links = Object.values(edgeCounts).map(e => {
         return {
             source: activeNodesMap.get(e.source),
@@ -154,7 +209,7 @@ function updateGraph() {
             weight: e.weight,
             segue: e.segue
         };
-    }).filter(e => e.source && e.target); // Safety check
+    }).filter(e => e.source && e.target);
 
     graphData = {
         nodes: Array.from(activeNodesMap.values()),
@@ -167,7 +222,7 @@ function updateGraph() {
 function renderGraph() {
     container.selectAll("*").remove();
 
-    // Arrows for directed graph
+    // Arrows
     container.append("defs").selectAll("marker")
         .data(["end"])
         .enter().append("marker")
@@ -179,10 +234,9 @@ function renderGraph() {
         .attr("markerHeight", 4)
         .attr("orient", "auto")
         .append("path")
-        .attr("fill", "#555")
+        .attr("fill", "var(--link-color)")
         .attr("d", "M0,-5L10,0L0,5");
 
-    // Edges
     linkElements = container.append("g")
         .selectAll("line")
         .data(graphData.links)
@@ -191,47 +245,67 @@ function renderGraph() {
         .attr("stroke-width", d => Math.sqrt(d.weight) + 0.5)
         .attr("marker-end", "url(#end)");
 
-    // Nodes
     nodeElements = container.append("g")
         .selectAll("circle")
         .data(graphData.nodes)
         .enter().append("circle")
         .attr("class", d => d.type === 'special' ? 'node node-special' : 'node node-song')
-        .attr("id", d => `node-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`) // Add clean IDs for fast selection
+        .attr("id", d => `node-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
         .attr("r", d => d.type === 'special' ? 12 : Math.max(3, Math.min(15, Math.sqrt(d.degree))))
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
             .on("end", dragended))
         .on("click", (event, d) => {
-            event.stopPropagation(); // Prevent SVG click from firing
+            event.stopPropagation();
             showStats(d);
         });
 
-    // Labels for special nodes and large nodes
     labelElements = container.append("g")
         .selectAll("text")
         .data(graphData.nodes)
         .enter().append("text")
         .attr("class", d => d.type === 'special' ? 'special-label' : 'node-label')
-        .attr("id", d => `label-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`) // Clean ID
+        .attr("id", d => `label-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
         .text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
         .attr("dx", 12)
         .attr("dy", ".35em");
 
-    // Node Tooltips
     nodeElements.append("title")
-        .text(d => d.title + " (" + d.degree + " plays in selection)");
+        .text(d => d.title + " (" + d.degree + " plays)");
 
-    // Simulation Setup
+    updateNodeColors();
+
     if (simulation) simulation.stop();
 
     simulation = d3.forceSimulation(graphData.nodes)
-        .force("link", d3.forceLink(graphData.links).distance(d => d.segue ? 20 : 60))
-        .force("charge", d3.forceManyBody().strength(-150))
+        .force("link", d3.forceLink(graphData.links).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
+        .force("charge", d3.forceManyBody().strength(repulsionStrength))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("collide", d3.forceCollide().radius(d => d.type === 'special' ? 15 : Math.sqrt(d.degree) + 2))
         .on("tick", ticked);
+}
+
+function updateNodeColors() {
+    const colorMode = document.getElementById('color-mapping').value;
+    
+    // Set 1 = Red, Set 2 = Blue
+    const r1=255, g1=77, b1=77;
+    const r2=77, g2=166, b2=255;
+
+    nodeElements.style("fill", d => {
+        if (d.type === 'special') return null; // Use CSS variables
+        
+        if (colorMode === 'set-probability') {
+            const ratio = d.setRatio;
+            const r = Math.round(r1 * ratio + r2 * (1 - ratio));
+            const g = Math.round(g1 * ratio + g2 * (1 - ratio));
+            const b = Math.round(b1 * ratio + b2 * (1 - ratio));
+            return `rgb(${r},${g},${b})`;
+        }
+        
+        return null; // Removes inline style, falling back to CSS variables
+    });
 }
 
 function ticked() {
@@ -278,17 +352,17 @@ function clearSelection() {
     document.getElementById('stats-placeholder').classList.remove('hidden');
     document.getElementById('stats-content').classList.add('hidden');
     
-    // Remove the global dimming class
     container.classed('has-selection', false);
     
-    // Remove individual highlight classes
     nodeElements.classed('selected', false).classed('connected', false);
-    linkElements.classed('connected', false);
+    linkElements.classed('connected', false).classed('walk-active', false);
     labelElements.classed('connected', false).text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""));
+
+    // Remove any walk elements
+    container.selectAll(".walker").remove();
 }
 
 function showStats(nodeData) {
-    // Fast path: if re-clicking the same node, do nothing or clear
     if (selectedNode && selectedNode.id === nodeData.id) {
         clearSelection();
         return;
@@ -301,36 +375,35 @@ function showStats(nodeData) {
 
     document.getElementById('stat-title').innerText = nodeData.title;
     document.getElementById('stat-plays').innerText = nodeData.degree;
+    
+    if (nodeData.type !== 'special') {
+        const s1pct = Math.round(nodeData.setRatio * 100);
+        document.getElementById('stat-set-breakdown').innerText = `Set 1: ${s1pct}% | Set 2+: ${100 - s1pct}%`;
+    } else {
+        document.getElementById('stat-set-breakdown').innerText = "";
+    }
 
-    // 1. Identify connections rapidly
     let incoming = [];
     let outgoing = [];
     let connectedNodeIds = new Set([nodeData.id]); 
-
-    // Find links where this node is source or target. Add to sets.
-    const connectedLinks = [];
     
     graphData.links.forEach(l => {
         if (l.target.id === nodeData.id) {
             incoming.push({ title: l.source.title, weight: l.weight });
             connectedNodeIds.add(l.source.id);
-            connectedLinks.push(l);
         } else if (l.source.id === nodeData.id) {
             outgoing.push({ title: l.target.title, weight: l.weight });
             connectedNodeIds.add(l.target.id);
-            connectedLinks.push(l);
         }
     });
 
-    // 2. Apply classes for fast CSS rendering
-    container.classed('has-selection', true); // Dims everything via CSS
+    container.classed('has-selection', true); 
     
-    // Clear old classes
     nodeElements.classed('selected', false).classed('connected', false);
-    linkElements.classed('connected', false);
+    linkElements.classed('connected', false).classed('walk-active', false);
     labelElements.classed('connected', false);
+    container.selectAll(".walker").remove();
 
-    // Apply new classes only to the relevant subset
     nodeElements.filter(d => connectedNodeIds.has(d.id))
         .classed('connected', true)
         .classed('selected', d => d.id === nodeData.id);
@@ -340,9 +413,8 @@ function showStats(nodeData) {
         
     labelElements.filter(d => connectedNodeIds.has(d.id))
         .classed('connected', true)
-        .text(d => d.title); // Ensure text is visible for connected nodes
+        .text(d => d.title); 
 
-    // 3. Sidebar Stats update
     incoming.sort((a, b) => b.weight - a.weight);
     outgoing.sort((a, b) => b.weight - a.weight);
 
@@ -365,20 +437,17 @@ function showStats(nodeData) {
 
 function highlightNode() {
     const searchTerm = document.getElementById('song-search').value.toLowerCase();
-    
     if (!searchTerm) {
         clearSelection();
         return;
     }
 
     container.classed('has-selection', true);
-    
     nodeElements.classed('selected', false).classed('connected', false);
     linkElements.classed('connected', false);
     labelElements.classed('connected', false);
 
     const matches = new Set();
-    
     nodeElements.filter(d => {
         if (d.type === 'special') return false;
         const isMatch = d.title.toLowerCase().includes(searchTerm);
@@ -391,3 +460,94 @@ function highlightNode() {
         .text(d => d.title);
 }
 
+// Markov Chain Generator
+async function generateSetlistWalk() {
+    document.getElementById('generated-setlist-output').classList.remove('hidden');
+    const ul = document.getElementById('generated-list');
+    ul.innerHTML = ''; // clear previous
+    
+    // Highlight modes
+    clearSelection();
+    container.classed('has-selection', true);
+
+    const startNode = graphData.nodes.find(n => n.id === 'START');
+    if (!startNode) return;
+
+    let currentNode = startNode;
+    let walkNodes = new Set([currentNode.id]);
+    let maxSteps = 40;
+    
+    // Create the "walker" dot
+    const walker = container.append("circle")
+        .attr("class", "walker")
+        .attr("r", 8)
+        .attr("fill", "#00ffcc")
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 2)
+        .attr("cx", currentNode.x)
+        .attr("cy", currentNode.y)
+        .style("filter", "drop-shadow(0 0 5px #00ffcc)");
+
+    while (currentNode.id !== 'END' && maxSteps > 0) {
+        // Find possible outgoing links
+        const options = graphData.links.filter(l => l.source.id === currentNode.id);
+        if (options.length === 0) break; // Dead end
+
+        // Calculate total weight
+        const totalWeight = options.reduce((sum, l) => sum + l.weight, 0);
+        
+        // Random selection based on weight
+        let rand = Math.random() * totalWeight;
+        let selectedLink = options[0];
+        
+        for (let l of options) {
+            rand -= l.weight;
+            if (rand <= 0) {
+                selectedLink = l;
+                break;
+            }
+        }
+
+        const nextNode = selectedLink.target;
+        
+        // Animate walker to next node
+        await new Promise(resolve => {
+            walker.transition()
+                .duration(800)
+                .ease(d3.easeCubicInOut)
+                .attr("cx", nextNode.x)
+                .attr("cy", nextNode.y)
+                .on("end", resolve);
+        });
+
+        // Add to UI List
+        if (nextNode.type !== 'special') {
+            const li = document.createElement('li');
+            li.innerText = nextNode.title;
+            if (selectedLink.segue) li.innerText += " ->";
+            ul.appendChild(li);
+            // Scroll to bottom
+            ul.parentElement.scrollTop = ul.parentElement.scrollHeight;
+        } else if (nextNode.id === 'SET_BREAK') {
+            const li = document.createElement('li');
+            li.innerHTML = "<em>-- Set Break --</em>";
+            li.style.color = "var(--accent-color)";
+            ul.appendChild(li);
+        }
+
+        // Highlight the path permanently for this run
+        nodeElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true);
+        labelElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true).text(d => d.title);
+        linkElements.filter(l => l === selectedLink).classed('walk-active', true).classed('connected', true);
+
+        currentNode = nextNode;
+        maxSteps--;
+    }
+    
+    // Walker explodes at the end
+    walker.transition()
+        .duration(500)
+        .attr("r", 30)
+        .style("opacity", 0)
+        .remove();
+}
