@@ -65,8 +65,8 @@ d3.json("data/graph_data.json").then(data => {
 document.getElementById('theme-toggle').addEventListener('click', () => {
     document.body.classList.toggle('light-mode');
     const isLight = document.body.classList.contains('light-mode');
-    // If light mode, show moon (to go dark). If dark mode, show sun (to go light).
-    document.getElementById('theme-toggle').innerText = isLight ? '🌙' : '☀️';
+    // Display current state icon: Sun for light mode, Moon for dark mode
+    document.getElementById('theme-toggle').innerText = isLight ? '☀️' : '🌙';
 });
 
 document.getElementById('preset-timeline').addEventListener('change', (e) => {
@@ -134,6 +134,11 @@ const mobileToggle = document.getElementById('mobile-menu-toggle');
 const mobileClose = document.getElementById('sidebar-close');
 let isResizing = false;
 
+// Set initial position of resizer
+if (resizer && sidebar) {
+    resizer.style.left = `${sidebar.offsetWidth}px`;
+}
+
 mobileToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     sidebar.classList.toggle('show');
@@ -164,12 +169,14 @@ resizer.addEventListener('mousedown', (e) => {
 window.addEventListener('mousemove', (e) => {
     if (!isResizing) return;
     
-    const newWidth = e.clientX;
-    if (newWidth >= 250 && newWidth <= 600) {
-        sidebar.style.width = `${newWidth}px`;
-        // Trigger a resize event to notify D3/SVG to adjust if needed
-        window.dispatchEvent(new Event('resize'));
-    }
+    // Use Math.min/max to cap the width between 250px and 600px
+    const newWidth = Math.max(250, Math.min(600, e.clientX));
+    
+    sidebar.style.width = `${newWidth}px`;
+    resizer.style.left = `${newWidth}px`; // Move the resizer along with the edge
+    
+    // Trigger a resize event to notify D3/SVG to adjust if needed
+    window.dispatchEvent(new Event('resize'));
 });
 
 window.addEventListener('mouseup', () => {

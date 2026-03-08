@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 :root {
     --bg-color: #111;
     --sidebar-bg: #222;
@@ -43,7 +47,7 @@ body {
 }
 
 #sidebar {
-    width: 340px;
+    width: 380px;
     min-width: 250px;
     max-width: 600px;
     background-color: var(--sidebar-bg);
@@ -116,7 +120,7 @@ body {
     }
 
     #sidebar-resizer {
-        display: none; /* No resizing on mobile */
+        display: none !important; /* No resizing on mobile */
     }
 
     #graph-container {
@@ -133,20 +137,21 @@ body {
 }
 
 #sidebar-resizer {
-    width: 8px;
-    height: 100%;
-    background: transparent;
+    width: 16px;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.01); /* Invisible but hit-testable */
     position: absolute;
-    right: 0;
+    left: 380px;
     top: 0;
     cursor: col-resize;
-    z-index: 20;
+    z-index: 999; /* Ensure it's on top of everything */
     transition: background 0.2s;
+    margin-left: -8px;
 }
 
 #sidebar-resizer:hover, #sidebar-resizer.resizing {
-    background: var(--accent-color);
-    opacity: 0.5;
+    background: var(--accent-color) !important;
+    opacity: 0.4 !important;
 }
 
 h2 {
