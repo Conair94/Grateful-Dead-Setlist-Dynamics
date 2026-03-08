@@ -631,8 +631,20 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
             songsInCurrentSet++;
         }
         
-        // Animate walker to next node
+        // Animate walker to next node AND pan camera
         await new Promise(resolve => {
+            // Pan camera to follow node
+            const transform = d3.zoomIdentity
+                .translate(width / 2, height / 2) // Center of screen
+                .scale(1) // Keep current zoom level
+                .translate(-nextNode.x, -nextNode.y); // Move to node
+
+            svg.transition()
+                .duration(800)
+                .ease(d3.easeCubicInOut)
+                .call(zoom.transform, transform);
+
+            // Move walker dot
             walker.transition()
                 .duration(800)
                 .ease(d3.easeCubicInOut)
