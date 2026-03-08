@@ -19,6 +19,7 @@
             <summary>About & Instructions</summary>
             <div class="section-content" style="font-size: 0.85rem; line-height: 1.4;">
                 <p style="margin-top: 0;"><strong>Timeframe Filter:</strong> Adjust the dates to recalculate connections based on that specific era.</p>
+                <p><strong>Graph Mode:</strong> Raw groups all plays into one node. Detailed creates separate nodes for Set 1, Set 2, and Epilogue.</p>
                 <p><strong>Set Probability:</strong> By default, Red nodes indicate Set 1 heavy songs; Blue nodes indicate Set 2+ heavy songs. Purple are mixed.</p>
                 <p><strong>Generative Walk:</strong> Simulates a setlist based on historical probabilities from your selected timeframe.</p>
                 <p style="margin-bottom: 0;"><strong>Interactivity:</strong> Drag nodes to rearrange them. Click a node to isolate its historical transitions.</p>
@@ -92,6 +93,13 @@
             <summary>Visualization Controls</summary>
             <div class="section-content">
                 <div class="control-group">
+                    <label for="graph-mode">Graph Display</label>
+                    <select id="graph-mode">
+                        <option value="raw" selected>Raw Display (All sets combined)</option>
+                        <option value="detailed">Detailed Display (Partitioned by set)</option>
+                    </select>
+                </div>
+                <div class="control-group">
                     <label for="color-mapping">Node Coloring</label>
                     <select id="color-mapping">
                         <option value="set-probability" selected>Set Probability (1st vs 2nd+)</option>
@@ -112,6 +120,12 @@
         <details class="ui-section">
             <summary>Generative Tools</summary>
             <div class="section-content">
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="include-epilogue" checked> 
+                        Include Epilogue (Encore)
+                    </label>
+                </div>
                 <div class="control-group">
                     <button id="generate-random-walk" style="width: 100%;">Generate Random Walk</button>
                     <button id="generate-realistic-walk" style="width: 100%; margin-top: 5px; background: var(--segue-color); color: #000;">Generate Realistic Walk</button>

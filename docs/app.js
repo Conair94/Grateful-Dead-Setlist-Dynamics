@@ -81,6 +81,7 @@ document.getElementById('preset-timeline').addEventListener('change', (e) => {
 document.getElementById('start-date').addEventListener('change', updateGraph);
 document.getElementById('end-date').addEventListener('change', updateGraph);
 document.getElementById('segue-only').addEventListener('change', updateGraph);
+document.getElementById('graph-mode').addEventListener('change', updateGraph);
 
 document.getElementById('song-search').addEventListener('input', () => {
     const searchTerm = document.getElementById('song-search').value.toLowerCase();
@@ -129,6 +130,7 @@ function updateGraph() {
     const startDate = document.getElementById('start-date').value;
     const endDate = document.getElementById('end-date').value;
     const segueOnly = document.getElementById('segue-only').checked;
+    const graphMode = document.getElementById('graph-mode').value;
     
     selectedNode = null;
     container.classed('has-selection', false);
@@ -150,56 +152,84 @@ function updateGraph() {
     let nodeSetStats = {};
     
     filteredEdges.forEach(e => {
-        const key = e.source + "|||" + e.target;
+        let sId = e.source;
+        let tId = e.target;
+
+        if (graphMode === 'detailed') {
+            if (sId !== 'START' && sId !== 'SET_BREAK' && sId !== 'ENCORE_BREAK' && sId !== 'END') {
+                sId = `${e.set_type}_${sId}`;
+            }
+            if (tId !== 'START' && tId !== 'SET_BREAK' && tId !== 'ENCORE_BREAK' && tId !== 'END') {
+                tId = `${e.set_type}_${tId}`;
+            }
+        }
+
+        const key = sId + "|||" + tId;
         if (!edgeCounts[key]) {
-            edgeCounts[key] = { source: e.source, target: e.target, weight: 0, segue: e.segue };
+            edgeCounts[key] = { source: sId, target: tId, weight: 0, segue: e.segue, set_type: e.set_type };
         }
         edgeCounts[key].weight += 1;
         
-        nodeDegrees[e.source] = (nodeDegrees[e.source] || 0) + 1;
-        nodeDegrees[e.target] = (nodeDegrees[e.target] || 0) + 1;
+        nodeDegrees[sId] = (nodeDegrees[sId] || 0) + 1;
+        nodeDegrees[tId] = (nodeDegrees[tId] || 0) + 1;
 
-        // Track Set Info
-        if (e.target !== 'END' && e.target !== 'SET_BREAK' && e.target !== 'START') {
-            if (!nodeSetStats[e.target]) nodeSetStats[e.target] = { set1: 0, set2plus: 0 };
-            if (e.set === 1) nodeSetStats[e.target].set1 += 1;
-            else nodeSetStats[e.target].set2plus += 1;
+        // Track Set Info for base songs
+        if (e.target !== 'END' && e.target !== 'SET_BREAK' && e.target !== 'ENCORE_BREAK' && e.target !== 'START') {
+            let baseT = e.target;
+            if (!nodeSetStats[baseT]) nodeSetStats[baseT] = { set1: 0, set2plus: 0 };
+            if (e.set_type === "set1") nodeSetStats[baseT].set1 += 1;
+            else nodeSetStats[baseT].set2plus += 1;
         }
-        if (e.source !== 'END' && e.source !== 'SET_BREAK' && e.source !== 'START') {
-            if (!nodeSetStats[e.source]) nodeSetStats[e.source] = { set1: 0, set2plus: 0 };
-            if (e.set === 1) nodeSetStats[e.source].set1 += 1;
-            else nodeSetStats[e.source].set2plus += 1;
+        if (e.source !== 'END' && e.source !== 'SET_BREAK' && e.source !== 'ENCORE_BREAK' && e.source !== 'START') {
+            let baseS = e.source;
+            if (!nodeSetStats[baseS]) nodeSetStats[baseS] = { set1: 0, set2plus: 0 };
+            if (e.set_type === "set1") nodeSetStats[baseS].set1 += 1;
+            else nodeSetStats[baseS].set2plus += 1;
         }
     });
 
-    // We only want nodes that are active in this timeframe (degree > 0), plus our special nodes
     let activeNodesMap = new Map();
     
-    rawNodes.forEach(n => {
-        if (nodeDegrees[n.id] > 0 || n.type === 'special') {
-            let nodeObj = { ...n, degree: nodeDegrees[n.id] || 0 };
+    Object.keys(nodeDegrees).forEach(nodeId => {
+        if (nodeDegrees[nodeId] > 0 || ['START', 'SET_BREAK', 'ENCORE_BREAK', 'END'].includes(nodeId)) {
+            let baseId = nodeId;
+            let setType = null;
             
-            // Set probability calc
-            let s1 = nodeSetStats[n.id] ? nodeSetStats[n.id].set1 : 0;
-            let s2 = nodeSetStats[n.id] ? nodeSetStats[n.id].set2plus : 0;
-            let total = s1 + s2;
-            nodeObj.set1Plays = s1;
-            nodeObj.set2Plays = s2;
-            nodeObj.setRatio = total > 0 ? s1 / total : 0.5; // 1 = only set 1, 0 = only set 2+
+            if (graphMode === 'detailed' && nodeId.includes('_') && !['START', 'SET_BREAK', 'ENCORE_BREAK', 'END'].includes(nodeId)) {
+                const parts = nodeId.split('_');
+                setType = parts[0];
+                baseId = parts.slice(1).join('_');
+            }
 
-            // Fix positions of special nodes
-            if (n.id === 'START') {
-                nodeObj.fx = width * 0.1;
-                nodeObj.fy = height / 2;
-            } else if (n.id === 'SET_BREAK') {
-                nodeObj.fx = width * 0.5;
-                nodeObj.fy = height / 2;
-            } else if (n.id === 'END') {
-                nodeObj.fx = width * 0.9;
-                nodeObj.fy = height / 2;
+            let rawNode = rawNodes.find(n => n.id === baseId);
+            if (!rawNode) return;
+
+            let nodeObj = { ...rawNode, id: nodeId, baseId: baseId, degree: nodeDegrees[nodeId] || 0 };
+            
+            if (rawNode.type === 'special') {
+                nodeObj.type = 'special';
+                if (nodeId === 'START') { nodeObj.fx = width * 0.1; nodeObj.fy = height / 2; }
+                else if (nodeId === 'SET_BREAK') { nodeObj.fx = width * 0.4; nodeObj.fy = height / 2; }
+                else if (nodeId === 'ENCORE_BREAK') { nodeObj.fx = width * 0.7; nodeObj.fy = height / 2; }
+                else if (nodeId === 'END') { nodeObj.fx = width * 0.9; nodeObj.fy = height / 2; }
+            } else {
+                // Set probability calc
+                let s1 = nodeSetStats[baseId] ? nodeSetStats[baseId].set1 : 0;
+                let s2 = nodeSetStats[baseId] ? nodeSetStats[baseId].set2plus : 0;
+                let total = s1 + s2;
+                nodeObj.set1Plays = s1;
+                nodeObj.set2Plays = s2;
+                nodeObj.setRatio = total > 0 ? s1 / total : 0.5;
+
+                // Adjust title for detailed view
+                if (graphMode === 'detailed') {
+                    if (setType === 'set1') nodeObj.title += " (Set 1)";
+                    else if (setType === 'set2') nodeObj.title += " (Set 2)";
+                    else if (setType === 'epilogue') nodeObj.title += " (Encore)";
+                }
             }
             
-            activeNodesMap.set(n.id, nodeObj);
+            activeNodesMap.set(nodeId, nodeObj);
         }
     });
 
@@ -381,7 +411,7 @@ function showStats(nodeData) {
     
     if (nodeData.type !== 'special') {
         const s1pct = Math.round(nodeData.setRatio * 100);
-        document.getElementById('stat-set-breakdown').innerText = `Set 1: ${s1pct}% | Set 2+: ${100 - s1pct}%`;
+        document.getElementById('stat-set-breakdown').innerText = `Overall Set 1: ${s1pct}% | Set 2+: ${100 - s1pct}%`;
     } else {
         document.getElementById('stat-set-breakdown').innerText = "";
     }
@@ -482,6 +512,7 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
     // Tracking state for realistic rules
     let currentSet = 1;
     let songsInCurrentSet = 0;
+    const includeEpilogue = document.getElementById('include-epilogue').checked;
     
     // Create the "walker" dot
     const walkerColor = enforceRealisticRules ? "#ff8c00" : "#00ffcc";
@@ -505,18 +536,23 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
                 const targetTitle = l.target.title ? l.target.title.toLowerCase() : "";
                 
                 // Rule 1: Drums/Space only allowed in Set 2
-                if (currentSet === 1 && (targetTitle === 'drums' || targetTitle === 'space')) {
+                if (currentSet === 1 && (targetTitle.includes('drums') || targetTitle.includes('space'))) {
                     return false;
                 }
                 
-                // Rule 2: Minimum 5 songs per set (prevent early SET_BREAK or END)
-                if ((targetId === 'SET_BREAK' || targetId === 'END') && songsInCurrentSet < 5) {
+                // Rule 2: Minimum 4 songs per set (prevent early SET_BREAK, ENCORE_BREAK or END)
+                if ((targetId === 'SET_BREAK' || targetId === 'ENCORE_BREAK' || targetId === 'END') && songsInCurrentSet < 4) {
                     return false;
                 }
                 
                 // Rule 3: Max 2 sets (SET_BREAK from set 2 must not lead to another set)
                 // We handle this by ensuring if we are in set 2, we don't go to SET_BREAK
                 if (currentSet >= 2 && targetId === 'SET_BREAK') {
+                    return false;
+                }
+
+                // Rule 4: Epilogue Toggle
+                if (!includeEpilogue && targetId === 'ENCORE_BREAK') {
                     return false;
                 }
 
@@ -549,7 +585,7 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
         const nextNode = selectedLink.target;
         
         // Update State
-        if (nextNode.id === 'SET_BREAK') {
+        if (nextNode.id === 'SET_BREAK' || nextNode.id === 'ENCORE_BREAK') {
             currentSet++;
             songsInCurrentSet = 0;
         } else if (nextNode.id !== 'END' && nextNode.id !== 'START') {
@@ -569,7 +605,7 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
         // Add to UI List
         if (nextNode.type !== 'special') {
             const li = document.createElement('li');
-            li.innerText = nextNode.title;
+            li.innerText = nextNode.title.replace(' (Set 1)', '').replace(' (Set 2)', '').replace(' (Encore)', '');
             if (selectedLink.segue) li.innerText += " ->";
             ul.appendChild(li);
             // Scroll to bottom
@@ -577,6 +613,11 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
         } else if (nextNode.id === 'SET_BREAK') {
             const li = document.createElement('li');
             li.innerHTML = "<em>-- Set Break --</em>";
+            li.style.color = "var(--accent-color)";
+            ul.appendChild(li);
+        } else if (nextNode.id === 'ENCORE_BREAK') {
+            const li = document.createElement('li');
+            li.innerHTML = "<em>-- Encore --</em>";
             li.style.color = "var(--accent-color)";
             ul.appendChild(li);
         }
