@@ -8,12 +8,22 @@
     <!-- D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
-<body>
+<body class="light-mode">
     <div id="sidebar">
         <div class="header-row">
             <h2>Grateful Dead Setlist Dynamics</h2>
-            <button id="theme-toggle" title="Toggle Theme">☀️</button>
+            <button id="theme-toggle" title="Toggle Theme">🌙</button>
         </div>
+
+        <details class="ui-section">
+            <summary>About & Instructions</summary>
+            <div class="section-content" style="font-size: 0.85rem; line-height: 1.4;">
+                <p style="margin-top: 0;"><strong>Timeframe Filter:</strong> Adjust the dates to recalculate connections based on that specific era.</p>
+                <p><strong>Set Probability:</strong> By default, Red nodes indicate Set 1 heavy songs; Blue nodes indicate Set 2+ heavy songs. Purple are mixed.</p>
+                <p><strong>Generative Walk:</strong> Simulates a setlist based on historical probabilities from your selected timeframe.</p>
+                <p style="margin-bottom: 0;"><strong>Interactivity:</strong> Drag nodes to rearrange them. Click a node to isolate its historical transitions.</p>
+            </div>
+        </details>
         
         <details open class="ui-section">
             <summary>Filters & Search</summary>
@@ -84,8 +94,8 @@
                 <div class="control-group">
                     <label for="color-mapping">Node Coloring</label>
                     <select id="color-mapping">
+                        <option value="set-probability" selected>Set Probability (1st vs 2nd+)</option>
                         <option value="default">Default Theme</option>
-                        <option value="set-probability">Set Probability (1st vs 2nd+)</option>
                     </select>
                 </div>
                 <div class="control-group">
