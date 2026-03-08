@@ -320,7 +320,7 @@ body.resizing-active #graph-container {
     font-size: 10px;
     fill: var(--label-color);
     pointer-events: none;
-    transition: opacity 0.2s, fill 0.2s;
+    transition: opacity 0.2s, fill 0.2s, font-size 0.3s;
     text-shadow: 0 1px 2px var(--label-shadow);
 }
 
@@ -329,7 +329,7 @@ body.resizing-active #graph-container {
     font-weight: bold;
     fill: var(--text-color);
     pointer-events: none;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, font-size 0.3s;
     text-shadow: 0 1px 3px var(--label-shadow);
 }
 
@@ -377,11 +377,19 @@ body.resizing-active #graph-container {
 }
 
 .has-selection .node-label.connected,
+.has-selection .node-label.selected {
+    opacity: 1;
+    fill: var(--text-color);
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 100;
+}
+
 .has-selection .special-label.connected,
-.has-selection .node-label.selected,
 .has-selection .special-label.selected {
     opacity: 1;
     fill: var(--text-color);
+    font-size: 20px;
 }
 
 .has-selection .node-label.connected:not(.selected) {
