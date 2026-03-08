@@ -134,11 +134,6 @@ const mobileToggle = document.getElementById('mobile-menu-toggle');
 const mobileClose = document.getElementById('sidebar-close');
 let isResizing = false;
 
-// Set initial position of resizer
-if (resizer && sidebar) {
-    resizer.style.left = `${sidebar.offsetWidth}px`;
-}
-
 mobileToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     sidebar.classList.toggle('show');
@@ -160,8 +155,10 @@ document.addEventListener('click', (e) => {
 });
 
 resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault(); // Prevent text selection and other defaults
     isResizing = true;
     resizer.classList.add('resizing');
+    document.body.classList.add('resizing-active');
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none'; // Prevent text selection during drag
 });
@@ -169,11 +166,10 @@ resizer.addEventListener('mousedown', (e) => {
 window.addEventListener('mousemove', (e) => {
     if (!isResizing) return;
     
-    // Use Math.min/max to cap the width between 250px and 600px
-    const newWidth = Math.max(250, Math.min(600, e.clientX));
+    // Use Math.min/max to cap the width between 250px and 800px
+    const newWidth = Math.max(250, Math.min(800, e.clientX));
     
     sidebar.style.width = `${newWidth}px`;
-    resizer.style.left = `${newWidth}px`; // Move the resizer along with the edge
     
     // Trigger a resize event to notify D3/SVG to adjust if needed
     window.dispatchEvent(new Event('resize'));
@@ -183,6 +179,7 @@ window.addEventListener('mouseup', () => {
     if (isResizing) {
         isResizing = false;
         resizer.classList.remove('resizing');
+        document.body.classList.remove('resizing-active');
         document.body.style.cursor = 'default';
         document.body.style.userSelect = 'auto';
     }
