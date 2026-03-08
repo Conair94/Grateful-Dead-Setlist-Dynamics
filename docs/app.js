@@ -109,7 +109,7 @@ document.getElementById('node-repulsion').addEventListener('input', (e) => {
     repulsionStrength = -parseInt(e.target.value);
     document.getElementById('repulsion-val').innerText = e.target.value;
     if (simulation) {
-        simulation.force("charge").strength(repulsionStrength);
+        simulation.force("charge").strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength);
         simulation.alpha(0.3).restart();
     }
 });
@@ -327,7 +327,14 @@ function renderGraph() {
 
     simulation = d3.forceSimulation(graphData.nodes)
         .force("link", d3.forceLink(graphData.links).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
-        .force("charge", d3.forceManyBody().strength(repulsionStrength))
+        .force("charge", d3.forceManyBody().strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength))
+        .force("x", d3.forceX(d => {
+            if (d.id === 'START') return width * -0.5;
+            if (d.id === 'SET_BREAK') return width * 0.5;
+            if (d.id === 'ENCORE_BREAK') return width * 1.5;
+            if (d.id === 'END') return width * 2.5;
+            return width / 2;
+        }).strength(d => d.type === 'special' ? 0.3 : 0))
         .force("center", d3.forceCenter(width / 2, height / 2))
         .force("collide", d3.forceCollide().radius(d => d.type === 'special' ? 15 : Math.sqrt(d.degree) + 2))
         .on("tick", ticked);
