@@ -122,7 +122,8 @@ document.getElementById('link-distance').addEventListener('input', (e) => {
     }
 });
 
-document.getElementById('generate-setlist').addEventListener('click', generateSetlistWalk);
+document.getElementById('generate-random-walk').addEventListener('click', () => generateSetlistWalk(false));
+document.getElementById('generate-realistic-walk').addEventListener('click', () => generateSetlistWalk(true));
 
 function updateGraph() {
     const startDate = document.getElementById('start-date').value;
@@ -355,7 +356,7 @@ function clearSelection() {
     container.classed('has-selection', false);
     
     nodeElements.classed('selected', false).classed('connected', false);
-    linkElements.classed('connected', false).classed('walk-active', false);
+    linkElements.classed('connected', false).classed('walk-active', false).style("stroke", null);
     labelElements.classed('connected', false).text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""));
 
     // Remove any walk elements
@@ -400,7 +401,7 @@ function showStats(nodeData) {
     container.classed('has-selection', true); 
     
     nodeElements.classed('selected', false).classed('connected', false);
-    linkElements.classed('connected', false).classed('walk-active', false);
+    linkElements.classed('connected', false).classed('walk-active', false).style("stroke", null);
     labelElements.classed('connected', false);
     container.selectAll(".walker").remove();
 
@@ -461,7 +462,7 @@ function highlightNode() {
 }
 
 // Markov Chain Generator
-async function generateSetlistWalk() {
+async function generateSetlistWalk(enforceRealisticRules = false) {
     document.getElementById('generated-setlist-output').classList.remove('hidden');
     const ul = document.getElementById('generated-list');
     ul.innerHTML = ''; // clear previous
@@ -474,23 +475,58 @@ async function generateSetlistWalk() {
     if (!startNode) return;
 
     let currentNode = startNode;
-    let walkNodes = new Set([currentNode.id]);
-    let maxSteps = 40;
+    let maxSteps = 50;
+    
+    // Tracking state for realistic rules
+    let currentSet = 1;
+    let songsInCurrentSet = 0;
     
     // Create the "walker" dot
+    const walkerColor = enforceRealisticRules ? "#ff8c00" : "#00ffcc";
     const walker = container.append("circle")
         .attr("class", "walker")
         .attr("r", 8)
-        .attr("fill", "#00ffcc")
+        .attr("fill", walkerColor)
         .attr("stroke", "#fff")
         .attr("stroke-width", 2)
         .attr("cx", currentNode.x)
         .attr("cy", currentNode.y)
-        .style("filter", "drop-shadow(0 0 5px #00ffcc)");
+        .style("filter", `drop-shadow(0 0 5px ${walkerColor})`);
 
     while (currentNode.id !== 'END' && maxSteps > 0) {
         // Find possible outgoing links
-        const options = graphData.links.filter(l => l.source.id === currentNode.id);
+        let options = graphData.links.filter(l => l.source.id === currentNode.id);
+        
+        if (enforceRealisticRules) {
+            options = options.filter(l => {
+                const targetId = l.target.id;
+                const targetTitle = l.target.title ? l.target.title.toLowerCase() : "";
+                
+                // Rule 1: Drums/Space only allowed in Set 2
+                if (currentSet === 1 && (targetTitle === 'drums' || targetTitle === 'space')) {
+                    return false;
+                }
+                
+                // Rule 2: Minimum 5 songs per set (prevent early SET_BREAK or END)
+                if ((targetId === 'SET_BREAK' || targetId === 'END') && songsInCurrentSet < 5) {
+                    return false;
+                }
+                
+                // Rule 3: Max 2 sets (SET_BREAK from set 2 must not lead to another set)
+                // We handle this by ensuring if we are in set 2, we don't go to SET_BREAK
+                if (currentSet >= 2 && targetId === 'SET_BREAK') {
+                    return false;
+                }
+
+                return true;
+            });
+            
+            // If rules filter out ALL options, fallback to any available option to prevent infinite stall
+            if (options.length === 0) {
+                 options = graphData.links.filter(l => l.source.id === currentNode.id);
+            }
+        }
+        
         if (options.length === 0) break; // Dead end
 
         // Calculate total weight
@@ -509,6 +545,14 @@ async function generateSetlistWalk() {
         }
 
         const nextNode = selectedLink.target;
+        
+        // Update State
+        if (nextNode.id === 'SET_BREAK') {
+            currentSet++;
+            songsInCurrentSet = 0;
+        } else if (nextNode.id !== 'END' && nextNode.id !== 'START') {
+            songsInCurrentSet++;
+        }
         
         // Animate walker to next node
         await new Promise(resolve => {
@@ -538,7 +582,12 @@ async function generateSetlistWalk() {
         // Highlight the path permanently for this run
         nodeElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true);
         labelElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true).text(d => d.title);
-        linkElements.filter(l => l === selectedLink).classed('walk-active', true).classed('connected', true);
+        
+        // Color the path orange if realistic, cyan if random
+        linkElements.filter(l => l === selectedLink)
+            .classed('walk-active', true)
+            .classed('connected', true)
+            .style("stroke", walkerColor);
 
         currentNode = nextNode;
         maxSteps--;
