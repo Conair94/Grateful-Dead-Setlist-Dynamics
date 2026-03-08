@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grateful Dead Setlist Graph</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>Grateful Dead Setlist Dynamics</h2>
+        
+        <div class="control-group">
+            <label for="preset-timeline">Preset Timelines</label>
+            <select id="preset-timeline">
+                <option value="">-- Select Preset --</option>
+                <optgroup label="General">
+                    <option value="1965-01|1995-08">All Time (1965 - 1995)</option>
+                </optgroup>
+                <optgroup label="Keyboardist Eras">
+                    <option value="1965-01|1972-06">Pigpen (1965 - 1972)</option>
+                    <option value="1968-11|1970-01">Tom Constanten (1968 - 1970)</option>
+                    <option value="1971-10|1979-02">Keith Godchaux (1971 - 1979)</option>
+                    <option value="1979-04|1990-07">Brent Mydland (1979 - 1990)</option>
+                    <option value="1990-09|1995-08">Vince Welnick (1990 - 1995)</option>
+                </optgroup>
+                <optgroup label="Album Eras (Release Year)">
+                    <option value="1967-01|1967-12">The Grateful Dead (1967)</option>
+                    <option value="1968-01|1968-12">Anthem of the Sun (1968)</option>
+                    <option value="1969-01|1969-12">Aoxomoxoa / Live/Dead (1969)</option>
+                    <option value="1970-01|1970-12">Workingman's / American Beauty (1970)</option>
+                    <option value="1971-01|1971-12">Grateful Dead [Skull & Roses] (1971)</option>
+                    <option value="1972-01|1972-12">Europe '72 (1972)</option>
+                    <option value="1973-01|1973-12">Wake of the Flood (1973)</option>
+                    <option value="1974-01|1974-12">From the Mars Hotel (1974)</option>
+                    <option value="1975-01|1975-12">Blues for Allah (1975)</option>
+                    <option value="1977-01|1977-12">Terrapin Station (1977)</option>
+                    <option value="1978-01|1978-12">Shakedown Street (1978)</option>
+                    <option value="1980-01|1980-12">Go to Heaven (1980)</option>
+                    <option value="1987-01|1987-12">In the Dark (1987)</option>
+                    <option value="1989-01|1989-12">Built to Last (1989)</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Timeframe</label>
+            <div class="date-inputs">
+                <input type="month" id="start-date" value="1965-01">
+                <span> to </span>
+                <input type="month" id="end-date" value="1995-08">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="segue-only"> 
+                Show Segues (->) Only
+            </label>
+        </div>
+
+        <div class="control-group">
+            <label for="song-search">Search Song</label>
+            <input type="text" id="song-search" placeholder="e.g. Dark Star" list="song-list">
+            <datalist id="song-list"></datalist>
+            <button id="clear-search">Clear</button>
+        </div>
+
+        <div id="stats-panel">
+            <h3>Selected Node Stats</h3>
+            <p id="stats-placeholder">Click a node to see details</p>
+            <div id="stats-content" class="hidden">
+                <h4 id="stat-title"></h4>
+                <p>Total Plays (in timeframe): <span id="stat-plays">0</span></p>
+                <h5>Most Common Predecessors:</h5>
+                <ul id="stat-prev"></ul>
+                <h5>Most Common Successors:</h5>
+                <ul id="stat-next"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="graph-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
