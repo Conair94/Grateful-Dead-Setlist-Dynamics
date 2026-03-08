@@ -10,63 +10,108 @@
 </head>
 <body>
     <div id="sidebar">
-        <h2>Grateful Dead Setlist Dynamics</h2>
+        <div class="header-row">
+            <h2>Grateful Dead Setlist Dynamics</h2>
+            <button id="theme-toggle" title="Toggle Theme">☀️</button>
+        </div>
         
-        <div class="control-group">
-            <label for="preset-timeline">Preset Timelines</label>
-            <select id="preset-timeline">
-                <option value="">-- Select Preset --</option>
-                <optgroup label="General">
-                    <option value="1965-01|1995-08">All Time (1965 - 1995)</option>
-                </optgroup>
-                <optgroup label="Keyboardist Eras">
-                    <option value="1965-01|1972-06">Pigpen (1965 - 1972)</option>
-                    <option value="1968-11|1970-01">Tom Constanten (1968 - 1970)</option>
-                    <option value="1971-10|1979-02">Keith Godchaux (1971 - 1979)</option>
-                    <option value="1979-04|1990-07">Brent Mydland (1979 - 1990)</option>
-                    <option value="1990-09|1995-08">Vince Welnick (1990 - 1995)</option>
-                </optgroup>
-                <optgroup label="Album Eras (Release Year)">
-                    <option value="1967-01|1967-12">The Grateful Dead (1967)</option>
-                    <option value="1968-01|1968-12">Anthem of the Sun (1968)</option>
-                    <option value="1969-01|1969-12">Aoxomoxoa / Live/Dead (1969)</option>
-                    <option value="1970-01|1970-12">Workingman's / American Beauty (1970)</option>
-                    <option value="1971-01|1971-12">Grateful Dead [Skull & Roses] (1971)</option>
-                    <option value="1972-01|1972-12">Europe '72 (1972)</option>
-                    <option value="1973-01|1973-12">Wake of the Flood (1973)</option>
-                    <option value="1974-01|1974-12">From the Mars Hotel (1974)</option>
-                    <option value="1975-01|1975-12">Blues for Allah (1975)</option>
-                    <option value="1977-01|1977-12">Terrapin Station (1977)</option>
-                    <option value="1978-01|1978-12">Shakedown Street (1978)</option>
-                    <option value="1980-01|1980-12">Go to Heaven (1980)</option>
-                    <option value="1987-01|1987-12">In the Dark (1987)</option>
-                    <option value="1989-01|1989-12">Built to Last (1989)</option>
-                </optgroup>
-            </select>
-        </div>
+        <details open class="ui-section">
+            <summary>Filters & Search</summary>
+            <div class="section-content">
+                <div class="control-group">
+                    <label for="preset-timeline">Preset Timelines</label>
+                    <select id="preset-timeline">
+                        <option value="">-- Select Preset --</option>
+                        <optgroup label="General">
+                            <option value="1965-01|1995-08">All Time (1965 - 1995)</option>
+                        </optgroup>
+                        <optgroup label="Keyboardist Eras">
+                            <option value="1965-01|1972-06">Pigpen (1965 - 1972)</option>
+                            <option value="1968-11|1970-01">Tom Constanten (1968 - 1970)</option>
+                            <option value="1971-10|1979-02">Keith Godchaux (1971 - 1979)</option>
+                            <option value="1979-04|1990-07">Brent Mydland (1979 - 1990)</option>
+                            <option value="1990-09|1995-08">Vince Welnick (1990 - 1995)</option>
+                        </optgroup>
+                        <optgroup label="Album Eras (Release Year)">
+                            <option value="1967-01|1967-12">The Grateful Dead (1967)</option>
+                            <option value="1968-01|1968-12">Anthem of the Sun (1968)</option>
+                            <option value="1969-01|1969-12">Aoxomoxoa / Live/Dead (1969)</option>
+                            <option value="1970-01|1970-12">Workingman's / American Beauty (1970)</option>
+                            <option value="1971-01|1971-12">Grateful Dead [Skull & Roses] (1971)</option>
+                            <option value="1972-01|1972-12">Europe '72 (1972)</option>
+                            <option value="1973-01|1973-12">Wake of the Flood (1973)</option>
+                            <option value="1974-01|1974-12">From the Mars Hotel (1974)</option>
+                            <option value="1975-01|1975-12">Blues for Allah (1975)</option>
+                            <option value="1977-01|1977-12">Terrapin Station (1977)</option>
+                            <option value="1978-01|1978-12">Shakedown Street (1978)</option>
+                            <option value="1980-01|1980-12">Go to Heaven (1980)</option>
+                            <option value="1987-01|1987-12">In the Dark (1987)</option>
+                            <option value="1989-01|1989-12">Built to Last (1989)</option>
+                        </optgroup>
+                    </select>
+                </div>
 
-        <div class="control-group">
-            <label>Timeframe</label>
-            <div class="date-inputs">
-                <input type="month" id="start-date" value="1965-01">
-                <span> to </span>
-                <input type="month" id="end-date" value="1995-08">
+                <div class="control-group">
+                    <label>Timeframe</label>
+                    <div class="date-inputs">
+                        <input type="month" id="start-date" value="1965-01">
+                        <span> to </span>
+                        <input type="month" id="end-date" value="1995-08">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>
+                        <input type="checkbox" id="segue-only"> 
+                        Show Segues (->) Only
+                    </label>
+                </div>
+
+                <div class="control-group">
+                    <label for="song-search">Search Song</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="text" id="song-search" placeholder="e.g. Dark Star" list="song-list" style="flex-grow: 1;">
+                        <datalist id="song-list"></datalist>
+                        <button id="clear-search">Clear</button>
+                    </div>
+                </div>
             </div>
-        </div>
+        </details>
 
-        <div class="control-group">
-            <label>
-                <input type="checkbox" id="segue-only"> 
-                Show Segues (->) Only
-            </label>
-        </div>
+        <details class="ui-section">
+            <summary>Visualization Controls</summary>
+            <div class="section-content">
+                <div class="control-group">
+                    <label for="color-mapping">Node Coloring</label>
+                    <select id="color-mapping">
+                        <option value="default">Default Theme</option>
+                        <option value="set-probability">Set Probability (1st vs 2nd+)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="node-repulsion">Node Repulsion: <span id="repulsion-val">300</span></label>
+                    <input type="range" id="node-repulsion" min="50" max="600" value="300">
+                </div>
+                <div class="control-group">
+                    <label for="link-distance">Link Distance: <span id="distance-val">100</span></label>
+                    <input type="range" id="link-distance" min="10" max="250" value="100">
+                </div>
+            </div>
+        </details>
 
-        <div class="control-group">
-            <label for="song-search">Search Song</label>
-            <input type="text" id="song-search" placeholder="e.g. Dark Star" list="song-list">
-            <datalist id="song-list"></datalist>
-            <button id="clear-search">Clear</button>
-        </div>
+        <details class="ui-section">
+            <summary>Generative Tools</summary>
+            <div class="section-content">
+                <div class="control-group">
+                    <button id="generate-random-walk" style="width: 100%;">Generate Random Walk</button>
+                    <button id="generate-realistic-walk" style="width: 100%; margin-top: 5px; background: var(--segue-color); color: #000;">Generate Realistic Walk</button>
+                </div>
+                <div id="generated-setlist-output" class="hidden">
+                    <h4 style="margin: 10px 0 5px 0; border-bottom: 1px solid var(--border-color);">Generated Run</h4>
+                    <ul id="generated-list" style="max-height: 150px; overflow-y: auto; padding-left: 15px; margin: 0;"></ul>
+                </div>
+            </div>
+        </details>
 
         <div id="stats-panel">
             <h3>Selected Node Stats</h3>
@@ -74,6 +119,7 @@
             <div id="stats-content" class="hidden">
                 <h4 id="stat-title"></h4>
                 <p>Total Plays (in timeframe): <span id="stat-plays">0</span></p>
+                <p id="stat-set-breakdown" style="font-size: 0.85rem; color: var(--accent-color); margin-top: -10px;"></p>
                 <h5>Most Common Predecessors:</h5>
                 <ul id="stat-prev"></ul>
                 <h5>Most Common Successors:</h5>

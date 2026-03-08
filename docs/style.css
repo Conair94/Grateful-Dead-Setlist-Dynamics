@@ -1,35 +1,113 @@
+:root {
+    --bg-color: #111;
+    --sidebar-bg: #222;
+    --text-color: #eee;
+    --accent-color: #4da6ff;
+    --input-bg: #333;
+    --border-color: #555;
+    --panel-bg: #1a1a1a;
+    --song-node: #4da6ff;
+    --special-node: #ff4d4d;
+    --link-color: #555;
+    --segue-color: #ffbb33;
+    --label-color: #ccc;
+    --label-shadow: rgba(0,0,0,0.8);
+}
+
+body.light-mode {
+    --bg-color: #f4f4f9;
+    --sidebar-bg: #fff;
+    --text-color: #333;
+    --accent-color: #0066cc;
+    --input-bg: #eee;
+    --border-color: #ccc;
+    --panel-bg: #f9f9f9;
+    --song-node: #0066cc;
+    --special-node: #cc0000;
+    --link-color: #999;
+    --segue-color: #ff8c00;
+    --label-color: #333;
+    --label-shadow: rgba(255,255,255,0.8);
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #111;
-    color: #eee;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     display: flex;
     height: 100vh;
     overflow: hidden;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 #sidebar {
-    width: 320px;
-    background-color: #222;
+    width: 340px;
+    background-color: var(--sidebar-bg);
     padding: 20px;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
     z-index: 10;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+    overflow-y: auto;
+    transition: background-color 0.3s;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 h2 {
-    margin-top: 0;
-    font-size: 1.4rem;
-    color: #4da6ff;
+    margin: 0;
+    font-size: 1.3rem;
+    color: var(--accent-color);
+}
+
+#theme-toggle {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Accordion sections */
+.ui-section {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.ui-section summary {
+    padding: 10px 15px;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.1);
+    user-select: none;
+}
+
+.ui-section summary:hover {
+    background-color: rgba(0,0,0,0.2);
+}
+
+.section-content {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .control-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
 }
 
 .date-inputs {
@@ -39,22 +117,22 @@ h2 {
 }
 
 input[type="month"], input[type="text"], select {
-    background: #333;
-    color: #fff;
-    border: 1px solid #555;
-    padding: 8px;
+    background: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 6px;
     border-radius: 4px;
     width: 100%;
     box-sizing: border-box;
 }
 
-input[type="month"] {
-    width: 120px;
+input[type="range"] {
+    width: 100%;
 }
 
 button {
-    background: #4da6ff;
-    color: #000;
+    background: var(--accent-color);
+    color: #fff;
     border: none;
     padding: 8px;
     border-radius: 4px;
@@ -63,14 +141,14 @@ button {
 }
 
 button:hover {
-    background: #3388dd;
+    opacity: 0.8;
 }
 
 #stats-panel {
-    background: #1a1a1a;
+    background: var(--panel-bg);
     padding: 15px;
     border-radius: 6px;
-    border: 1px solid #333;
+    border: 1px solid var(--border-color);
     flex-grow: 1;
     overflow-y: auto;
 }
@@ -78,7 +156,7 @@ button:hover {
 #stats-panel h3 {
     margin-top: 0;
     font-size: 1.1rem;
-    border-bottom: 1px solid #444;
+    border-bottom: 1px solid var(--border-color);
     padding-bottom: 5px;
 }
 
@@ -103,48 +181,50 @@ li {
 
 /* D3 Elements */
 .node-special {
-    fill: #ff4d4d;
-    stroke: #fff;
+    fill: var(--special-node);
+    stroke: var(--bg-color);
     stroke-width: 2px;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, fill 0.3s;
 }
 
 .node-song {
-    fill: #4da6ff;
-    stroke: #222;
+    fill: var(--song-node);
+    stroke: var(--bg-color);
     stroke-width: 1px;
-    transition: opacity 0.2s, stroke 0.2s, stroke-width 0.2s;
+    transition: opacity 0.2s, stroke 0.2s, stroke-width 0.2s, fill 0.3s;
 }
 
 .node:hover {
-    stroke: #fff;
+    stroke: var(--text-color);
     stroke-width: 2px;
 }
 
 .link {
-    stroke: #555;
+    stroke: var(--link-color);
     stroke-opacity: 0.6;
     transition: stroke-opacity 0.2s, stroke 0.2s;
 }
 
 .link.segue {
-    stroke: #ffbb33;
+    stroke: var(--segue-color);
     stroke-opacity: 0.8;
 }
 
 .node-label {
     font-size: 10px;
-    fill: #ccc;
+    fill: var(--label-color);
     pointer-events: none;
     transition: opacity 0.2s, fill 0.2s;
+    text-shadow: 0 1px 2px var(--label-shadow);
 }
 
 .special-label {
     font-size: 14px;
     font-weight: bold;
-    fill: #fff;
+    fill: var(--text-color);
     pointer-events: none;
     transition: opacity 0.2s;
+    text-shadow: 0 1px 3px var(--label-shadow);
 }
 
 /* Optimized Selection Highlighting */
@@ -164,24 +244,30 @@ li {
 /* Overrides for selected/connected items */
 .has-selection .node.connected {
     opacity: 1;
-    stroke: #4da6ff;
+    stroke: var(--accent-color);
     stroke-width: 2px;
 }
 
 .has-selection .node.selected {
     opacity: 1;
-    stroke: #fff;
+    stroke: var(--text-color);
     stroke-width: 3px;
 }
 
 .has-selection .link.connected {
-    stroke: #fff;
+    stroke: var(--text-color);
     stroke-opacity: 0.8 !important;
 }
 
 .has-selection .link.segue.connected {
-    stroke: #ffbb33;
+    stroke: var(--segue-color);
     stroke-opacity: 1 !important;
+}
+
+.has-selection .link.walk-active {
+    stroke: #00ffcc !important;
+    stroke-opacity: 1 !important;
+    stroke-width: 2px !important;
 }
 
 .has-selection .node-label.connected,
@@ -189,9 +275,9 @@ li {
 .has-selection .node-label.selected,
 .has-selection .special-label.selected {
     opacity: 1;
-    fill: #fff;
+    fill: var(--text-color);
 }
 
 .has-selection .node-label.connected:not(.selected) {
-    fill: #4da6ff;
+    fill: var(--accent-color);
 }

@@ -75,7 +75,8 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
                             "source": "START", 
                             "target": current_song, 
                             "date": show_date, 
-                            "segue": False
+                            "segue": False,
+                            "set": set_seq
                         })
                     else:
                         # First song of a subsequent set
@@ -83,7 +84,8 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
                             "source": "SET_BREAK", 
                             "target": current_song, 
                             "date": show_date, 
-                            "segue": False
+                            "segue": False,
+                            "set": set_seq
                         })
                 
                 # Link to next song or end of set
@@ -94,7 +96,8 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
                         "source": current_song, 
                         "target": next_song, 
                         "date": show_date, 
-                        "segue": is_segue
+                        "segue": is_segue,
+                        "set": set_seq
                     })
                 else:
                     # Last song of the set
@@ -104,7 +107,8 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
                             "source": current_song, 
                             "target": "END", 
                             "date": show_date, 
-                            "segue": False
+                            "segue": False,
+                            "set": set_seq
                         })
                     else:
                         # Ends a set, but there is another set coming
@@ -112,17 +116,18 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
                             "source": current_song, 
                             "target": "SET_BREAK", 
                             "date": show_date, 
-                            "segue": False
+                            "segue": False,
+                            "set": set_seq
                         })
 
     # 3. Export to JSON
-    graph_data = {
+    graphData = {
         "nodes": nodes,
         "edges": edges
     }
     
     with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(graph_data, f, separators=(',', ':'))
+        json.dump(graphData, f, separators=(',', ':'))
         
     print(f"Successfully exported {len(nodes)} nodes and {len(edges)} edges to {output_path}")
 
