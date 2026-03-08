@@ -8,3 +8,9 @@ A study of Grateful Dead set list composition using graph neural networks and Ma
 4. Mood signal Analysis looking at types of songs played in a set in sequence (rocker>jam>ballad>high-energy-jam>drums/experimental>ballad>etc)
 5. Shannon-style information entropy analysis.
 6. A nice UI and website to create and interact with diagrams
+
+
+# New ideas of things to study
+1. Proper graph viewing accounting for set start and set end and set break, maybe even a set 1 set 2 split
+2. Interactive viewing webpage
+3. Date selection. 
