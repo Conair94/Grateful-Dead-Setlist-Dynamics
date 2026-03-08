@@ -18,6 +18,7 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
     nodes = [
         {"id": "START", "title": "Start of Concert", "type": "special"},
         {"id": "SET_BREAK", "title": "Set Break", "type": "special"},
+        {"id": "ENCORE_BREAK", "title": "Encore Break", "type": "special"},
         {"id": "END", "title": "End of Concert", "type": "special"}
     ]
     
@@ -63,6 +64,14 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
         for i, set_seq in enumerate(set_keys):
             current_set = sets[set_seq]
             
+            # Determine Set Type based on index
+            if i == 0:
+                set_type = "set1"
+            elif i == 1:
+                set_type = "set2"
+            else:
+                set_type = "epilogue"
+            
             for j, song_data in enumerate(current_set):
                 current_song = song_data['song_id']
                 is_segue = bool(song_data['segue'])
@@ -76,16 +85,34 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
                             "target": current_song, 
                             "date": show_date, 
                             "segue": False,
-                            "set": set_seq
+                            "set_type": set_type
+                        })
+                    elif set_type == "epilogue" and i == 2:
+                        # Entering the epilogue from set 2
+                        edges.append({
+                            "source": "ENCORE_BREAK", 
+                            "target": current_song, 
+                            "date": show_date, 
+                            "segue": False,
+                            "set_type": set_type
+                        })
+                    elif set_type == "epilogue" and i > 2:
+                        # Multiple encores, continue from previous
+                        edges.append({
+                            "source": "ENCORE_BREAK", 
+                            "target": current_song, 
+                            "date": show_date, 
+                            "segue": False,
+                            "set_type": set_type
                         })
                     else:
-                        # First song of a subsequent set
+                        # First song of Set 2
                         edges.append({
                             "source": "SET_BREAK", 
                             "target": current_song, 
                             "date": show_date, 
                             "segue": False,
-                            "set": set_seq
+                            "set_type": set_type
                         })
                 
                 # Link to next song or end of set
@@ -97,28 +124,38 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
                         "target": next_song, 
                         "date": show_date, 
                         "segue": is_segue,
-                        "set": set_seq
+                        "set_type": set_type
                     })
                 else:
                     # Last song of the set
                     if i == len(set_keys) - 1:
-                        # Last set of the show
+                        # Absolute last set of the show
                         edges.append({
                             "source": current_song, 
                             "target": "END", 
                             "date": show_date, 
                             "segue": False,
-                            "set": set_seq
+                            "set_type": set_type
                         })
                     else:
                         # Ends a set, but there is another set coming
-                        edges.append({
-                            "source": current_song, 
-                            "target": "SET_BREAK", 
-                            "date": show_date, 
-                            "segue": False,
-                            "set": set_seq
-                        })
+                        next_set_index = i + 1
+                        if next_set_index >= 2: # Going into an epilogue
+                            edges.append({
+                                "source": current_song, 
+                                "target": "ENCORE_BREAK", 
+                                "date": show_date, 
+                                "segue": False,
+                                "set_type": set_type
+                            })
+                        else:
+                            edges.append({
+                                "source": current_song, 
+                                "target": "SET_BREAK", 
+                                "date": show_date, 
+                                "segue": False,
+                                "set_type": set_type
+                            })
 
     # 3. Export to JSON
     graphData = {
