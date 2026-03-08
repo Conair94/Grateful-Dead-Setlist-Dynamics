@@ -44,6 +44,8 @@ body {
 
 #sidebar {
     width: 340px;
+    min-width: 250px;
+    max-width: 600px;
     background-color: var(--sidebar-bg);
     padding: 20px;
     box-shadow: 2px 0 10px rgba(0,0,0,0.2);
@@ -52,13 +54,98 @@ body {
     flex-direction: column;
     gap: 15px;
     overflow-y: auto;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.3s ease;
+    position: relative;
 }
 
 .header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#mobile-menu-toggle {
+    display: none;
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 100;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #mobile-menu-toggle {
+        display: block;
+    }
+
+    .mobile-only {
+        display: block;
+    }
+
+    #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: 85% !important;
+        max-width: 340px;
+        transform: translateX(-100%);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+    }
+
+    #sidebar.show {
+        transform: translateX(0);
+    }
+
+    #sidebar-resizer {
+        display: none; /* No resizing on mobile */
+    }
+
+    #graph-container {
+        width: 100vw;
+    }
+
+    #sidebar-close {
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        font-size: 1rem;
+        padding: 4px 10px;
+    }
+}
+
+#sidebar-resizer {
+    width: 8px;
+    height: 100%;
+    background: transparent;
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: col-resize;
+    z-index: 20;
+    transition: background 0.2s;
+}
+
+#sidebar-resizer:hover, #sidebar-resizer.resizing {
+    background: var(--accent-color);
+    opacity: 0.5;
 }
 
 h2 {
