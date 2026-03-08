@@ -275,6 +275,8 @@ function renderGraph() {
     nodeElements.append("title")
         .text(d => d.title + " (" + d.degree + " plays)");
 
+    // Force color update on render
+    document.getElementById('color-mapping').value = 'set-probability';
     updateNodeColors();
 
     if (simulation) simulation.stop();
