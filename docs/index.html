@@ -20,7 +20,7 @@
             <div class="section-content" style="font-size: 0.85rem; line-height: 1.4;">
                 <p style="margin-top: 0;"><strong>Timeframe Filter:</strong> Adjust the dates to recalculate connections based on that specific era.</p>
                 <p><strong>Graph Mode:</strong> Raw groups all plays into one node. Detailed creates separate nodes for Set 1, Set 2, and Epilogue.</p>
-                <p><strong>Set Probability:</strong> By default, Red nodes indicate Set 1 heavy songs; Blue nodes indicate Set 2+ heavy songs. Purple are mixed.</p>
+                <p><strong>Dynamic Coloring:</strong> By default, Red nodes indicate Set 1 heavy songs; Blue nodes indicate Set 2+ heavy songs. In Detailed Mode, coloring represents how early (red) or late (blue) in the set a song is played.</p>
                 <p><strong>Generative Walk:</strong> Simulates a setlist based on historical probabilities from your selected timeframe.</p>
                 <p style="margin-bottom: 0;"><strong>Interactivity:</strong> Drag nodes to rearrange them. Click a node to isolate its historical transitions.</p>
             </div>
@@ -102,7 +102,7 @@
                 <div class="control-group">
                     <label for="color-mapping">Node Coloring</label>
                     <select id="color-mapping">
-                        <option value="set-probability" selected>Set Probability (1st vs 2nd+)</option>
+                        <option value="set-probability" selected>Dynamic Coloring</option>
                         <option value="default">Default Theme</option>
                     </select>
                 </div>

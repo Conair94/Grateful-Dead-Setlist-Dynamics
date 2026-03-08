@@ -175,16 +175,24 @@ function updateGraph() {
 
         // Track Set Info for base songs
         if (e.target !== 'END' && e.target !== 'SET_BREAK' && e.target !== 'ENCORE_BREAK' && e.target !== 'START') {
-            let baseT = e.target;
-            if (!nodeSetStats[baseT]) nodeSetStats[baseT] = { set1: 0, set2plus: 0 };
-            if (e.set_type === "set1") nodeSetStats[baseT].set1 += 1;
-            else nodeSetStats[baseT].set2plus += 1;
+            let nId = graphMode === 'detailed' ? tId : e.target;
+            if (!nodeSetStats[nId]) nodeSetStats[nId] = { set1: 0, set2plus: 0, posSum: 0, posCount: 0 };
+            if (e.set_type === "set1") nodeSetStats[nId].set1 += 1;
+            else nodeSetStats[nId].set2plus += 1;
+            if (e.target_pos !== undefined) {
+                nodeSetStats[nId].posSum += e.target_pos;
+                nodeSetStats[nId].posCount += 1;
+            }
         }
         if (e.source !== 'END' && e.source !== 'SET_BREAK' && e.source !== 'ENCORE_BREAK' && e.source !== 'START') {
-            let baseS = e.source;
-            if (!nodeSetStats[baseS]) nodeSetStats[baseS] = { set1: 0, set2plus: 0 };
-            if (e.set_type === "set1") nodeSetStats[baseS].set1 += 1;
-            else nodeSetStats[baseS].set2plus += 1;
+            let nId = graphMode === 'detailed' ? sId : e.source;
+            if (!nodeSetStats[nId]) nodeSetStats[nId] = { set1: 0, set2plus: 0, posSum: 0, posCount: 0 };
+            if (e.set_type === "set1") nodeSetStats[nId].set1 += 1;
+            else nodeSetStats[nId].set2plus += 1;
+            if (e.source_pos !== undefined) {
+                nodeSetStats[nId].posSum += e.source_pos;
+                nodeSetStats[nId].posCount += 1;
+            }
         }
     });
 
@@ -208,18 +216,24 @@ function updateGraph() {
             
             if (rawNode.type === 'special') {
                 nodeObj.type = 'special';
-                if (nodeId === 'START') { nodeObj.fx = width * 0.1; nodeObj.fy = height / 2; }
-                else if (nodeId === 'SET_BREAK') { nodeObj.fx = width * 0.4; nodeObj.fy = height / 2; }
-                else if (nodeId === 'ENCORE_BREAK') { nodeObj.fx = width * 0.7; nodeObj.fy = height / 2; }
-                else if (nodeId === 'END') { nodeObj.fx = width * 0.9; nodeObj.fy = height / 2; }
+                // Spread nodes far apart
+                if (nodeId === 'START') { nodeObj.fx = width * -0.5; nodeObj.fy = height / 2; }
+                else if (nodeId === 'SET_BREAK') { nodeObj.fx = width * 0.5; nodeObj.fy = height / 2; }
+                else if (nodeId === 'ENCORE_BREAK') { nodeObj.fx = width * 1.5; nodeObj.fy = height / 2; }
+                else if (nodeId === 'END') { nodeObj.fx = width * 2.5; nodeObj.fy = height / 2; }
             } else {
                 // Set probability calc
-                let s1 = nodeSetStats[baseId] ? nodeSetStats[baseId].set1 : 0;
-                let s2 = nodeSetStats[baseId] ? nodeSetStats[baseId].set2plus : 0;
+                let s1 = nodeSetStats[nodeId] ? nodeSetStats[nodeId].set1 : 0;
+                let s2 = nodeSetStats[nodeId] ? nodeSetStats[nodeId].set2plus : 0;
                 let total = s1 + s2;
                 nodeObj.set1Plays = s1;
                 nodeObj.set2Plays = s2;
                 nodeObj.setRatio = total > 0 ? s1 / total : 0.5;
+
+                // Position Average calc for Detailed Mode coloring
+                let pSum = nodeSetStats[nodeId] ? nodeSetStats[nodeId].posSum : 0;
+                let pCount = nodeSetStats[nodeId] ? nodeSetStats[nodeId].posCount : 0;
+                nodeObj.posAvg = pCount > 0 ? pSum / pCount : 0.5;
 
                 // Adjust title for detailed view
                 if (graphMode === 'detailed') {
@@ -321,22 +335,40 @@ function renderGraph() {
 
 function updateNodeColors() {
     const colorMode = document.getElementById('color-mapping').value;
+    const graphMode = document.getElementById('graph-mode').value;
     
-    // Set 1 = Red, Set 2 = Blue
+    // Set 1 / Start = Red
+    // Set 2 / End = Blue
+    // Middle = Purple
     const r1=255, g1=77, b1=77;
     const r2=77, g2=166, b2=255;
 
     nodeElements.style("fill", d => {
-        if (d.type === 'special') return null; // Use CSS variables
-        
         if (colorMode === 'set-probability') {
-            const ratio = d.setRatio;
-            const r = Math.round(r1 * ratio + r2 * (1 - ratio));
-            const g = Math.round(g1 * ratio + g2 * (1 - ratio));
-            const b = Math.round(b1 * ratio + b2 * (1 - ratio));
-            return `rgb(${r},${g},${b})`;
+            if (d.type === 'special') {
+                // Special Node Gradient
+                if (d.id === 'START') return `rgb(${r1},${g1},${b1})`; // Red
+                if (d.id === 'SET_BREAK') return `rgb(166, 121, 166)`; // Purpleish
+                if (d.id === 'ENCORE_BREAK') return `rgb(100, 140, 200)`; // Light Blue
+                if (d.id === 'END') return `rgb(${r2},${g2},${b2})`; // Blue
+            } else {
+                let ratio = d.setRatio; // Used for Raw mode (Set 1 vs 2)
+
+                if (graphMode === 'detailed') {
+                    // In detailed mode, use the positional average (0.0 = start, 1.0 = end)
+                    // Reverse it so 1.0 maps to Red, 0.0 to Blue, to match Set1 vs Set2 colors
+                    ratio = 1.0 - d.posAvg;
+                }
+
+                const r = Math.round(r1 * ratio + r2 * (1 - ratio));
+                const g = Math.round(g1 * ratio + g2 * (1 - ratio));
+                const b = Math.round(b1 * ratio + b2 * (1 - ratio));
+                return `rgb(${r},${g},${b})`;
+            }
         }
         
+        // Reset special nodes to default if not in custom color mode
+        if (d.type === 'special') return null; 
         return null; // Removes inline style, falling back to CSS variables
     });
 }
