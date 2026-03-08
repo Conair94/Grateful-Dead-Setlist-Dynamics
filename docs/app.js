@@ -96,6 +96,7 @@ function updateGraph() {
     const segueOnly = document.getElementById('segue-only').checked;
     
     selectedNode = null; // Clear selection on data change
+    container.classed('has-selection', false);
 
     // Filter edges based on date and segue
     let filteredEdges = rawEdges.filter(e => {
@@ -196,6 +197,7 @@ function renderGraph() {
         .data(graphData.nodes)
         .enter().append("circle")
         .attr("class", d => d.type === 'special' ? 'node node-special' : 'node node-song')
+        .attr("id", d => `node-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`) // Add clean IDs for fast selection
         .attr("r", d => d.type === 'special' ? 12 : Math.max(3, Math.min(15, Math.sqrt(d.degree))))
         .call(d3.drag()
             .on("start", dragstarted)
@@ -212,6 +214,7 @@ function renderGraph() {
         .data(graphData.nodes)
         .enter().append("text")
         .attr("class", d => d.type === 'special' ? 'special-label' : 'node-label')
+        .attr("id", d => `label-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`) // Clean ID
         .text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
         .attr("dx", 12)
         .attr("dy", ".35em");
@@ -275,21 +278,22 @@ function clearSelection() {
     document.getElementById('stats-placeholder').classList.remove('hidden');
     document.getElementById('stats-content').classList.add('hidden');
     
-    // Reset visual styles
-    nodeElements.style("opacity", 1)
-        .attr("stroke", d => d.type === 'special' ? "#fff" : "#222")
-        .attr("stroke-width", d => d.type === 'special' ? 2 : 1);
-        
-    linkElements.style("opacity", d => d.segue ? 0.8 : 0.6)
-        .attr("stroke", d => d.segue ? "#ffbb33" : "#555")
-        .attr("stroke-width", d => Math.sqrt(d.weight) + 0.5);
-        
-    labelElements.style("opacity", 1)
-        .text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
-        .attr("fill", d => d.type === 'special' ? "#fff" : "#ccc");
+    // Remove the global dimming class
+    container.classed('has-selection', false);
+    
+    // Remove individual highlight classes
+    nodeElements.classed('selected', false).classed('connected', false);
+    linkElements.classed('connected', false);
+    labelElements.classed('connected', false).text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""));
 }
 
 function showStats(nodeData) {
+    // Fast path: if re-clicking the same node, do nothing or clear
+    if (selectedNode && selectedNode.id === nodeData.id) {
+        clearSelection();
+        return;
+    }
+
     selectedNode = nodeData;
     
     document.getElementById('stats-placeholder').classList.add('hidden');
@@ -298,51 +302,47 @@ function showStats(nodeData) {
     document.getElementById('stat-title').innerText = nodeData.title;
     document.getElementById('stat-plays').innerText = nodeData.degree;
 
-    // Find predecessors and successors
+    // 1. Identify connections rapidly
     let incoming = [];
     let outgoing = [];
-    let connectedNodeIds = new Set([nodeData.id]); // Store connected node IDs for highlighting
+    let connectedNodeIds = new Set([nodeData.id]); 
 
+    // Find links where this node is source or target. Add to sets.
+    const connectedLinks = [];
+    
     graphData.links.forEach(l => {
         if (l.target.id === nodeData.id) {
             incoming.push({ title: l.source.title, weight: l.weight });
             connectedNodeIds.add(l.source.id);
-        }
-        if (l.source.id === nodeData.id) {
+            connectedLinks.push(l);
+        } else if (l.source.id === nodeData.id) {
             outgoing.push({ title: l.target.title, weight: l.weight });
             connectedNodeIds.add(l.target.id);
+            connectedLinks.push(l);
         }
     });
 
-    // Update Network Visuals for Path Tracing
-    nodeElements
-        .style("opacity", d => connectedNodeIds.has(d.id) ? 1 : 0.1)
-        .attr("stroke", d => d.id === nodeData.id ? "#fff" : (connectedNodeIds.has(d.id) ? "#4da6ff" : "#222"))
-        .attr("stroke-width", d => d.id === nodeData.id ? 3 : (connectedNodeIds.has(d.id) ? 2 : 1));
+    // 2. Apply classes for fast CSS rendering
+    container.classed('has-selection', true); // Dims everything via CSS
+    
+    // Clear old classes
+    nodeElements.classed('selected', false).classed('connected', false);
+    linkElements.classed('connected', false);
+    labelElements.classed('connected', false);
 
-    linkElements
-        .style("opacity", l => (l.source.id === nodeData.id || l.target.id === nodeData.id) ? (l.segue ? 1 : 0.8) : 0.05)
-        .attr("stroke", l => {
-            if (l.source.id === nodeData.id || l.target.id === nodeData.id) return l.segue ? "#ffbb33" : "#fff";
-            return "#555";
-        })
-        .attr("stroke-width", l => {
-            if (l.source.id === nodeData.id || l.target.id === nodeData.id) return Math.sqrt(l.weight) + 1.5;
-            return Math.sqrt(l.weight) + 0.5;
-        });
+    // Apply new classes only to the relevant subset
+    nodeElements.filter(d => connectedNodeIds.has(d.id))
+        .classed('connected', true)
+        .classed('selected', d => d.id === nodeData.id);
+        
+    linkElements.filter(l => l.source.id === nodeData.id || l.target.id === nodeData.id)
+        .classed('connected', true);
+        
+    labelElements.filter(d => connectedNodeIds.has(d.id))
+        .classed('connected', true)
+        .text(d => d.title); // Ensure text is visible for connected nodes
 
-    labelElements
-        .style("opacity", d => connectedNodeIds.has(d.id) ? 1 : 0.1)
-        .text(d => {
-            if (d.type === 'special') return d.title;
-            // Show label if it's the selected node, a connected node, or a large background node
-            if (d.id === nodeData.id || connectedNodeIds.has(d.id)) return d.title;
-            return d.degree > 100 ? d.title : "";
-        })
-        .attr("fill", d => d.id === nodeData.id ? "#fff" : (connectedNodeIds.has(d.id) ? "#4da6ff" : "#ccc"));
-
-
-    // Sidebar Stats update
+    // 3. Sidebar Stats update
     incoming.sort((a, b) => b.weight - a.weight);
     outgoing.sort((a, b) => b.weight - a.weight);
 
@@ -371,17 +371,23 @@ function highlightNode() {
         return;
     }
 
-    nodeElements.attr("stroke", d => {
-        if (d.type === 'special') return "#fff";
-        return d.title.toLowerCase().includes(searchTerm) ? "#ffff00" : "#222";
-    }).attr("stroke-width", d => d.title.toLowerCase().includes(searchTerm) ? 3 : 1)
-      .style("opacity", d => d.title.toLowerCase().includes(searchTerm) ? 1 : 0.3);
+    container.classed('has-selection', true);
+    
+    nodeElements.classed('selected', false).classed('connected', false);
+    linkElements.classed('connected', false);
+    labelElements.classed('connected', false);
 
-    labelElements.text(d => {
-        if (d.type === 'special') return d.title;
-        return d.title.toLowerCase().includes(searchTerm) ? d.title : (d.degree > 100 ? d.title : "");
-    }).attr("fill", d => d.title.toLowerCase().includes(searchTerm) ? "#ffff00" : "#ccc")
-      .style("opacity", d => d.title.toLowerCase().includes(searchTerm) ? 1 : 0.3);
-      
-    linkElements.style("opacity", 0.1);
+    const matches = new Set();
+    
+    nodeElements.filter(d => {
+        if (d.type === 'special') return false;
+        const isMatch = d.title.toLowerCase().includes(searchTerm);
+        if (isMatch) matches.add(d.id);
+        return isMatch;
+    }).classed('selected', true);
+    
+    labelElements.filter(d => matches.has(d.id))
+        .classed('selected', true)
+        .text(d => d.title);
 }
+

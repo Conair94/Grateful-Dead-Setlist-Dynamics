@@ -38,7 +38,7 @@ h2 {
     gap: 10px;
 }
 
-input[type="month"], input[type="text"] {
+input[type="month"], input[type="text"], select {
     background: #333;
     color: #fff;
     border: 1px solid #555;
@@ -106,12 +106,14 @@ li {
     fill: #ff4d4d;
     stroke: #fff;
     stroke-width: 2px;
+    transition: opacity 0.2s;
 }
 
 .node-song {
     fill: #4da6ff;
     stroke: #222;
     stroke-width: 1px;
+    transition: opacity 0.2s, stroke 0.2s, stroke-width 0.2s;
 }
 
 .node:hover {
@@ -122,6 +124,7 @@ li {
 .link {
     stroke: #555;
     stroke-opacity: 0.6;
+    transition: stroke-opacity 0.2s, stroke 0.2s;
 }
 
 .link.segue {
@@ -133,6 +136,7 @@ li {
     font-size: 10px;
     fill: #ccc;
     pointer-events: none;
+    transition: opacity 0.2s, fill 0.2s;
 }
 
 .special-label {
@@ -140,4 +144,54 @@ li {
     font-weight: bold;
     fill: #fff;
     pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+/* Optimized Selection Highlighting */
+.has-selection .node {
+    opacity: 0.1;
+}
+
+.has-selection .link {
+    stroke-opacity: 0.05 !important;
+}
+
+.has-selection .node-label,
+.has-selection .special-label {
+    opacity: 0.1;
+}
+
+/* Overrides for selected/connected items */
+.has-selection .node.connected {
+    opacity: 1;
+    stroke: #4da6ff;
+    stroke-width: 2px;
+}
+
+.has-selection .node.selected {
+    opacity: 1;
+    stroke: #fff;
+    stroke-width: 3px;
+}
+
+.has-selection .link.connected {
+    stroke: #fff;
+    stroke-opacity: 0.8 !important;
+}
+
+.has-selection .link.segue.connected {
+    stroke: #ffbb33;
+    stroke-opacity: 1 !important;
+}
+
+.has-selection .node-label.connected,
+.has-selection .special-label.connected,
+.has-selection .node-label.selected,
+.has-selection .special-label.selected {
+    opacity: 1;
+    fill: #fff;
+}
+
+.has-selection .node-label.connected:not(.selected) {
+    fill: #4da6ff;
 }
