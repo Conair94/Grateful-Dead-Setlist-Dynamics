@@ -91,7 +91,7 @@ def fetch_data(endpoint, max_retries=3):
             
     return None
 
-def setup_database(db_path='grateful_dead.db'):
+def setup_database(db_path='../data/raw/grateful_dead.db'):
     """Sets up the SQLite database schema for concerts, songs, and venues."""
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -196,7 +196,7 @@ def scrape_show_details(show_id, conn):
     conn.commit()
 
 def main():
-    db_path = 'grateful_dead.db'
+    db_path = '../data/raw/grateful_dead.db'
     conn = setup_database(db_path)
     logging.info(f"Database initialized at {db_path}")
     

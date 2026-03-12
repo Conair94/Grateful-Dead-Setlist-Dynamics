@@ -3,7 +3,7 @@ import pandas as pd
 
 def load_data():
     # Connect to the local SQLite database
-    conn = sqlite3.connect('grateful_dead.db')
+    conn = sqlite3.connect('../data/raw/grateful_dead.db')
     
     # Query to join the shows and the setlists into a single useful DataFrame
     query = '''
