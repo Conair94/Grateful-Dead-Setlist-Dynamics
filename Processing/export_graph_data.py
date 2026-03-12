@@ -3,7 +3,7 @@ import json
 import os
 from collections import defaultdict
 
-def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/graph_data.json'):
+def export_graph_data(db_path='../data/raw/grateful_dead.db', output_path='../docs/data/graph_data.json'):
     # Ensure output directory exists
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
@@ -184,5 +184,5 @@ def export_graph_data(db_path='grateful_dead.db', output_path='../docs/data/grap
 
 if __name__ == '__main__':
     # When run from Processing folder
-    db_loc = '../grateful_dead.db' if os.path.exists('../grateful_dead.db') else 'grateful_dead.db'
+    db_loc = '../data/raw/grateful_dead.db' if os.path.exists('../data/raw/grateful_dead.db') else 'data/raw/grateful_dead.db'
     export_graph_data(db_path=db_loc, output_path='../docs/data/graph_data.json')
