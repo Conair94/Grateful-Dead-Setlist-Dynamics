@@ -21,33 +21,45 @@ This document tracks the progress, goals, and organizational structure of the ma
 ## 🛠 Project Roadmap
 
 ### Phase 1: Foundation & Analytics
-- [ ] **Grateful Dead Analytics:** Further work on existing data to deepen baseline insights.
-- [ ] **Cross-Band Data Acquisition:** Scrape setlist data for secondary bands (Phish, Phish.net API, etc.) to enable comparative analysis.
-- [x] **Website Expansion (Phase 1a):** Added interactive transition inspection (click predecessors/successors to see concert dates).
-- [ ] **Website Expansion (Phase 1b):** Redesign the current interface for broader interactive data exploration.
+*   **Grateful Dead Analytics:**
+    *   Further work on existing data to deepen baseline insights.
+*   **Cross-Band Data Acquisition:**
+    *   Scrape setlist data for secondary bands (Phish, Phish.net API, etc.) to enable comparative analysis.
+*   **Website Expansion:**
+    *   [x] **Phase 1a:** Added interactive transition inspection (click predecessors/successors to see concert dates).
+    - [ ] **Phase 1b:** Redesign current interface for broader interactive data exploration.
 
 ### Phase 2: Data Engineering (The Pipeline)
-- [ ] **Audio Extraction Pipeline:**
-    - [ ] Integrate YouTube search functionality to locate specific performances.
-    - [ ] Implement a temporary file management module for processing.
-    - [ ] Average songs from different performances to set a baseline.
-    - [ ] Handle edge cases for when performance doesn't exist
-- [ ] **Feature Engineering:** 
-    - [ ] Build a mood processing pipeline using **Essentia** to extract high-level feature vectors from audio.
-    - [ ] **Era-Normalization:** Develop methods to distinguish between "performance mood" and "recording quality/production style" across decades.
+*   **Audio Extraction Pipeline:**
+    *   [x] **Search Strategy:** Use YouTube to find "Song Name + Artist + Live".
+    *   [x] **Fallback Logic:** If primary search fails, fall back to "Song Name + Live" to ensure at least 3 versions are found.
+    *   [x] **Fetch Logic:** Implement a download module (using `yt-dlp`) for temporary audio extraction.
+    *   [x] **Popularity Filtering:** Fetch the 3 most popular/relevant videos per song.
+*   **Feature Engineering:**
+    *   [x] **Mood Extraction:** Use **Essentia** to extract mood feature vectors (Danceability, Energy, BPM, Valence/Mood, Loudness).
+    *   [x] **Ensemble Averaging:** Average the feature vectors from the 3 performances to create a robust "Song Fingerprint."
+    *   [x] **Storage:** Save averaged feature data to `data/processed/` in JSON format.
+    *   **Era-Normalization:**
+        *   Develop methods to distinguish between "performance mood" and "recording quality/production style" across decades.
 
 ### Phase 3: Modeling & Generation
-- [ ] **Comparison Framework:** Develop methods to compare fingerprints between bands/eras.
-- [ ] **Setlist Mood Visualization:** Create "Energy Curves" or "Mood Arcs" to visualize the emotional trajectory of a full concert.
-- [ ] **Setlist Generator:** Implement the generative model (Style XYZ for Band ABC).
+*   **Comparison Framework:**
+    *   Develop methods to compare fingerprints between bands/eras.
+*   **Setlist Mood Visualization:**
+    *   Create "Energy Curves" or "Mood Arcs" to visualize the emotional trajectory of a full concert.
+*   **Setlist Generator:**
+    *   Implement the generative model (Style XYZ for Band ABC).
 
 ### Phase 4: Synthesis & Publication
-- [ ] **Research Questions:**
-    - [ ] **Song Evolution:** Does the "fingerprint" of a specific song (e.g., "Dark Star") fundamentally change over different eras (1969 vs. 1974 vs. 1990)?
-    - [ ] **The "Magic" Variable:** Can we quantitatively isolate the "spark" of highly-rated shows vs. average ones?
-- [ ] **Validation:** Perform "Turing Tests" for setlists—have experts/community members rate generated vs. authentic setlists.
-- [ ] **Paper Drafting:** Prepare manuscripts for SWPACA and ISMIR based on synthesized findings.
-- [ ] **Final Synthesis:** Consolidate findings and package the project into a finished research artifact.
+*   **Research Questions:**
+    *   **Song Evolution:** Does the "fingerprint" of a specific song (e.g., "Dark Star") fundamentally change over different eras (1969 vs. 1974 vs. 1990)?
+    *   **The "Magic" Variable:** Can we quantitatively isolate the "spark" of highly-rated shows vs. average ones?
+*   **Validation:**
+    *   Perform "Turing Tests" for setlists—have experts/community members rate generated vs. authentic setlists.
+*   **Paper Drafting:**
+    *   Prepare manuscripts for SWPACA and ISMIR based on synthesized findings.
+*   **Final Synthesis:**
+    *   Consolidate findings and package the project into a finished research artifact.
 
 ---
 
@@ -75,7 +87,10 @@ To support the upcoming data processing pipeline and ML workflows, we will trans
 ---
 
 ## 📈 Current Status
-*   **Current Phase:** Phase 1 (Foundation & Website Expansion)
+*   **Current Phase:** Phase 2 (Data Engineering & Mood Extraction)
 *   **Last Update:** 2026-03-12
-*   **Active Focus:** Enhancing interactive website features and preparing for cross-band data.
-*   **Recent Changes:** Implemented transition date inspection in the stats panel.
+*   **Active Focus:** Scaling the mood extraction pipeline to the full song catalog.
+*   **Recent Changes:** 
+    - Implemented `pipeline/coordinator.py` for full audio-to-feature workflow.
+    - Successfully extracted and averaged Essentia mood features for the first song ("It's A Sin").
+    - Integrated `yt-dlp` for robust YouTube searching and audio extraction.
