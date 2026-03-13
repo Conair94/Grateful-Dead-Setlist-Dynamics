@@ -1,4 +1,5 @@
 let rawNodes = [];
+let rawNodesMap = new Map();
 let rawEdges = [];
 let currentFilteredEdges = []; // Store the currently filtered edges globally
 let graphData = { nodes: [], links: [] };
@@ -75,6 +76,7 @@ document.getElementById('end-date').value = `${randomYear}-12`;
 // Load data
 d3.json("data/graph_data.json").then(data => {
     rawNodes = data.nodes;
+    rawNodes.forEach(n => rawNodesMap.set(n.id, n));
     rawEdges = data.edges;
 
     // Extract sorted unique dates for sliding window mode
@@ -413,7 +415,6 @@ function updateGraph() {
     const segueOnly = document.getElementById('segue-only').checked;
     const graphMode = document.getElementById('graph-mode').value;
     
-    // selectedNode = null; // Removing this to allow pinning across updates
     container.classed('has-selection', !!selectedNode);
     document.getElementById('stats-placeholder').classList.toggle('hidden', !!selectedNode);
     document.getElementById('stats-content').classList.toggle('hidden', !selectedNode);
@@ -481,8 +482,7 @@ function updateGraph() {
             });
 
             // Combine for Union View
-            const allEdgesForProcessing = [...edgesB, ...edgesA];
-            finalEdges = allEdgesForProcessing;
+            finalEdges = [...edgesB, ...edgesA];
         }
     }
 
@@ -500,6 +500,7 @@ function updateGraph() {
 
         const key = sId + "|||" + tId;
         if (!edgeCounts[key]) {
+            // Check if this edge exists in the primary (Period B) set
             const inB = edgesB.some(eb => {
                 let ebS = eb.source, ebT = eb.target;
                 if (graphMode === 'detailed') {
@@ -568,7 +569,7 @@ function updateGraph() {
                 baseId = parts.slice(1).join('_');
             }
 
-            let rawNode = rawNodes.find(n => n.id === baseId);
+            let rawNode = rawNodesMap.get(baseId);
             if (!rawNode) return;
 
             let nodeObj;
@@ -578,7 +579,6 @@ function updateGraph() {
             } else {
                 nodeObj = { ...rawNode, id: nodeId, baseId: baseId, setType: setType, degree: nodeDegrees[nodeId] || 0 };
                 if (rawNode.type === 'special') {
-                    nodeObj.type = 'special';
                     if (nodeId === 'START') { nodeObj.x = width * -0.5; nodeObj.y = height / 2; }
                     else if (nodeId === 'SET_BREAK') { nodeObj.x = width * 0.5; nodeObj.y = height / 2; }
                     else if (nodeId === 'ENCORE_BREAK') { nodeObj.x = width * 1.5; nodeObj.y = height / 2; }
@@ -637,16 +637,18 @@ function renderGraph() {
     const links = linkGroup.selectAll("line")
         .data(graphData.links, d => d.id);
 
-    links.exit().transition().duration(300).style("stroke-opacity", 0).remove();
+    // Faster exit for smoother scrubbing
+    links.exit().transition().duration(150).style("stroke-opacity", 0).remove();
 
     const linksEnter = links.enter().append("line")
         .attr("class", d => d.segue ? "link segue" : "link")
         .attr("marker-end", "url(#end)")
         .style("stroke-opacity", 0);
 
-    linkElements = linksEnter.merge(links);
+    // Update linkElements to include ALL lines in the DOM, ensuring exiting ones stay connected during fade
+    linkElements = linkGroup.selectAll("line");
     
-    linkElements.transition().duration(300)
+    linksEnter.merge(links).transition().duration(isPlaying ? 100 : 300)
         .attr("stroke-width", d => Math.sqrt(d.weight) + 0.5)
         .style("stroke-opacity", d => d.segue ? 0.8 : 0.6)
         .style("stroke", d => {
@@ -661,7 +663,7 @@ function renderGraph() {
     const nodes = nodeGroup.selectAll("circle")
         .data(graphData.nodes, d => d.id);
 
-    nodes.exit().transition().duration(300).attr("r", 0).remove();
+    nodes.exit().transition().duration(150).attr("r", 0).remove();
 
     const nodesEnter = nodes.enter().append("circle")
         .attr("class", d => d.type === 'special' ? 'node node-special' : 'node node-song')
@@ -675,10 +677,12 @@ function renderGraph() {
 
     nodesEnter.append("title");
 
-    nodeElements = nodesEnter.merge(nodes);
-    nodeElements.select("title").text(d => d.title + " (" + d.degree + " plays)");
+    // Update nodeElements to include ALL circles in the DOM
+    nodeElements = nodeGroup.selectAll("circle");
+    
+    nodesEnter.merge(nodes).select("title").text(d => d.title + " (" + d.degree + " plays)");
 
-    nodeElements.transition().duration(300)
+    nodesEnter.merge(nodes).transition().duration(isPlaying ? 100 : 300)
         .attr("r", d => d.type === 'special' ? 12 : Math.max(3, Math.min(15, Math.sqrt(d.degree))));
 
     updateNodeColors();
@@ -687,7 +691,7 @@ function renderGraph() {
     const labels = labelGroup.selectAll("text")
         .data(graphData.nodes, d => d.id);
 
-    labels.exit().transition().duration(300).style("opacity", 0).remove();
+    labels.exit().transition().duration(150).style("opacity", 0).remove();
 
     const labelsEnter = labels.enter().append("text")
         .attr("class", d => d.type === 'special' ? 'special-label' : 'node-label')
@@ -696,9 +700,11 @@ function renderGraph() {
         .attr("dy", ".35em")
         .style("opacity", 0);
 
-    labelElements = labelsEnter.merge(labels);
-    labelElements.text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
-        .transition().duration(300)
+    // Update labelElements to include ALL text in the DOM
+    labelElements = labelGroup.selectAll("text");
+    
+    labelsEnter.merge(labels).text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
+        .transition().duration(isPlaying ? 100 : 300)
         .style("opacity", 1);
 
     // Simulation Update
@@ -733,6 +739,7 @@ function updateNodeColors() {
     const r2=77, g2=166, b2=255;
 
     nodeElements.style("fill", d => {
+        if (!d) return null;
         if (isDeltaMode) {
             if (d.deltaStatus === 'added') return "#2ecc71";
             if (d.deltaStatus === 'removed') return "#e74c3c";
@@ -754,10 +761,9 @@ function updateNodeColors() {
                 return `rgb(${r},${g},${b})`;
             }
         }
-        if (d.type === 'special') return null; 
         return null; 
     }).style("stroke", d => {
-        if (isDeltaMode) {
+        if (d && isDeltaMode) {
             if (d.deltaStatus === 'added') return "#27ae60";
             if (d.deltaStatus === 'removed') return "#c0392b";
         }
@@ -783,11 +789,10 @@ function ticked() {
     // Camera Tracking (Pinning)
     const pinCheckbox = document.getElementById('pin-node');
     if (pinCheckbox && pinCheckbox.checked && selectedNode) {
+        // Optimized: only calculate transform if needed
         const t = d3.zoomTransform(svg.node());
-        const targetX = width / 2;
-        const targetY = height / 2;
-        const newTx = targetX - t.k * selectedNode.x;
-        const newTy = targetY - t.k * selectedNode.y;
+        const newTx = (width / 2) - t.k * selectedNode.x;
+        const newTy = (height / 2) - t.k * selectedNode.y;
         svg.call(zoom.transform, d3.zoomIdentity.translate(newTx, newTy).scale(t.k));
     }
 }
@@ -817,7 +822,9 @@ function dragended(event, d) {
 
 function clearSelection() {
     selectedNode = null;
-    document.getElementById('pin-node').checked = false;
+    const pinNode = document.getElementById('pin-node');
+    if (pinNode) pinNode.checked = false;
+    
     document.getElementById('stats-placeholder').classList.remove('hidden');
     document.getElementById('stats-content').classList.add('hidden');
     
@@ -953,13 +960,13 @@ function highlightNode() {
 
     const matches = new Set();
     nodeElements.filter(d => {
-        if (d.type === 'special') return false;
+        if (!d || d.type === 'special') return false;
         const isMatch = d.title.toLowerCase().includes(searchTerm);
         if (isMatch) matches.add(d.id);
         return isMatch;
     }).classed('selected', true);
     
-    labelElements.filter(d => matches.has(d.id))
+    labelElements.filter(d => d && matches.has(d.id))
         .classed('selected', true)
         .text(d => d.title);
 }
@@ -967,9 +974,10 @@ function highlightNode() {
 // Markov Chain Generator
 async function generateSetlistWalk(enforceRealisticRules = false) {
     const walkDuration = parseInt(document.getElementById('walk-speed').value) || 800;
-    document.getElementById('generated-setlist-output').classList.remove('hidden');
+    const outputEl = document.getElementById('generated-setlist-output');
+    if (outputEl) outputEl.classList.remove('hidden');
     const ul = document.getElementById('generated-list');
-    ul.innerHTML = '';
+    if (ul) ul.innerHTML = '';
     
     clearSelection();
     container.classed('has-selection', true);
@@ -982,7 +990,8 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
     
     let currentSet = 1;
     let songsInCurrentSet = 0;
-    const includeEpilogue = document.getElementById('include-epilogue').checked;
+    const epilogueCheck = document.getElementById('include-epilogue');
+    const includeEpilogue = epilogueCheck ? epilogueCheck.checked : true;
     
     const walkerColor = enforceRealisticRules ? "#ff8c00" : "#00ffcc";
     const walker = container.append("circle")
@@ -1074,22 +1083,24 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
             const li = document.createElement('li');
             li.innerText = nextNode.title.replace(' (Set 1)', '').replace(' (Set 2)', '').replace(' (Encore)', '');
             if (selectedLink.segue) li.innerText += " ->";
-            ul.appendChild(li);
-            ul.parentElement.scrollTop = ul.parentElement.scrollHeight;
+            if (ul) {
+                ul.appendChild(li);
+                ul.parentElement.scrollTop = ul.parentElement.scrollHeight;
+            }
         } else if (nextNode.id === 'SET_BREAK') {
             const li = document.createElement('li');
             li.innerHTML = "<em>-- Set Break --</em>";
             li.style.color = "var(--accent-color)";
-            ul.appendChild(li);
+            if (ul) ul.appendChild(li);
         } else if (nextNode.id === 'ENCORE_BREAK') {
             const li = document.createElement('li');
             li.innerHTML = "<em>-- Encore --</em>";
             li.style.color = "var(--accent-color)";
-            ul.appendChild(li);
+            if (ul) ul.appendChild(li);
         }
 
-        nodeElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true);
-        labelElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true).text(d => d.title);
+        nodeElements.filter(d => d && (d.id === currentNode.id || d.id === nextNode.id)).classed('connected', true);
+        labelElements.filter(d => d && (d.id === currentNode.id || d.id === nextNode.id)).classed('connected', true).text(d => d.title);
         
         linkElements.filter(l => l === selectedLink)
             .classed('walk-active', true)
@@ -1106,3 +1117,4 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
         .style("opacity", 0)
         .remove();
 }
+
