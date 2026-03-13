@@ -128,5 +128,77 @@
             "Grateful Dead - Man Smart, Woman Smarter (Orchard Park, NY, 7/4/89)",
             "Grateful Dead - Man Smart Woman Smarter (Live at Cardinal; Louisville, KY 07/06/90) [Official Video]"
         ]
+    },
+    {
+        "song_title": "China Doll",
+        "timestamp": "2026-03-13 11:26:34",
+        "reasons": [
+            "BPM Variance: 72.51 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead Perform \"China Doll\" -Shoreline- 6/16/90",
+            "Grateful Dead 9-21-74 China Doll",
+            "China Doll, 2/19/73 \u262e Grateful Dead"
+        ]
+    },
+    {
+        "song_title": "Sunrise",
+        "timestamp": "2026-03-13 11:55:46",
+        "reasons": [
+            "BPM Variance: 78.94 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead - Sunrise",
+            "Grateful Dead - \"Sunrise\" (Toronto, 11/2/77)",
+            "Grateful Dead - \"Sunrise\" Terrapin Station (1977)"
+        ]
+    },
+    {
+        "song_title": "Iko Iko",
+        "timestamp": "2026-03-13 11:57:18",
+        "reasons": [
+            "BPM Variance: 61.66 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead - Iko Iko (Philadelphia, PA 7/7/89) (Official Live Video)",
+            "Grateful Dead - Iko Iko (Shoreline 9/30/89)",
+            "Grateful Dead - Iko Iko 4-11-78"
+        ]
+    },
+    {
+        "song_title": "Mack The Knife",
+        "timestamp": "2026-03-13 12:12:16",
+        "reasons": [
+            "BPM Variance: 75.35 (limit 60)"
+        ],
+        "version_titles": [
+            "Bobby Darin \"Mack The Knife\" on The Ed Sullivan Show",
+            "Bobby Darin - Mack the Knife (Live 1970)",
+            "Louis Armstrong - Mack The Knife (Live At The BBC)"
+        ]
+    },
+    {
+        "song_title": "Lucifer's Eyes",
+        "timestamp": "2026-03-13 12:13:08",
+        "reasons": [
+            "Danceability Variance: 0.40 (limit 0.4)"
+        ],
+        "version_titles": [
+            "Joan Baez - Lucifers Eyes - 12/31/1981 - Oakland Auditorium (Official)",
+            "Lucifer - 01 Cemetery Eyes (Live Stockholm Sweden 2020) Full HD",
+            "T.O.L.D. - \"Lucifer's Eyes\""
+        ]
+    },
+    {
+        "song_title": "Keep Your Day Job",
+        "timestamp": "2026-03-13 12:17:20",
+        "reasons": [
+            "BPM Variance: 83.24 (limit 60)"
+        ],
+        "version_titles": [
+            "The Grateful Dead   Keep Your Day Job   12 30 83   San Francisco Civic Auditorium OFFICIAL Low",
+            "Grateful Dead - Keep Your Day Job - September 20, 1982",
+            "Grateful Dead - Keep Your Day Job (8-29-1982 at Seattle Center Coliseum)"
+        ]
     }
 ]
