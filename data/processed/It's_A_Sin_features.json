@@ -54,5 +54,7 @@
         "rhythm.beats_loudness.stdev": 0.033160957197348274,
         "lowlevel.loudness_ebu128.short_term.dmean": 0.17569329837958017,
         "rhythm.beats_loudness.min": 3.174057267716727e-05
-    }
+    },
+    "outlier_reasons": null,
+    "outlier_flag": false
 }

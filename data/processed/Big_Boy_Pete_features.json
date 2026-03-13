@@ -55,11 +55,8 @@
         "rhythm.bpm": 114.58072408040364,
         "rhythm.beats_loudness.dvar": 0.00035740467622720945
     },
-    "outlier_flag": true,
-    "outlier_reasons": [
-        "BPM Variance: 27.62 (limit 20)",
-        "Danceability Variance: 0.22 (limit 0.2)"
-    ],
+    "outlier_flag": false,
+    "outlier_reasons": null,
     "raw_versions": [
         {
             "id": "8S2RNcwuyEo",

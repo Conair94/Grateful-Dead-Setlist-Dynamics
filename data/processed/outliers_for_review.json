@@ -15,8 +15,7 @@
         "song_title": "Tastebud",
         "timestamp": "2026-03-13 10:28:47",
         "reasons": [
-            "BPM Variance: 73.58 (limit 20)",
-            "Danceability Variance: 0.22 (limit 0.2)"
+            "BPM Variance: 73.58 (limit 20)"
         ],
         "version_titles": [
             "Grateful Dead - Tastebud - June 1966 - Buena Vista Studio - San Francisco,CA",
@@ -45,43 +44,6 @@
             "Grateful Dead - Good Lovin' - Egypt 9-16-78",
             "Good Lovin' - Grateful Dead - 10-31-1980 Radio City, NY set3-10",
             "Grateful Dead [4k Remaster] Good Lovin'  -1981 03 28  - (pro shot) Rockpalast {Essen, GERMANY}"
-        ]
-    },
-    {
-        "song_title": "Big Boy Pete",
-        "timestamp": "2026-03-13 10:30:23",
-        "reasons": [
-            "BPM Variance: 27.62 (limit 20)",
-            "Danceability Variance: 0.22 (limit 0.2)"
-        ],
-        "version_titles": [
-            "Grateful Dead- Big Boy Pete- 11-17-78",
-            "Grateful Dead - Big Boy Pete 1966-11-29",
-            "Grateful Dead Perform \"Big Boy Pete\" 12-31-69"
-        ]
-    },
-    {
-        "song_title": "I Just Want To Make Love To You",
-        "timestamp": "2026-03-13 10:30:49",
-        "reasons": [
-            "BPM Variance: 48.48 (limit 20)",
-            "Danceability Variance: 0.34 (limit 0.2)"
-        ],
-        "version_titles": [
-            "Grateful Dead ~ I Just Want To Make Love To You 11-29-1966 The Matrix",
-            "Grateful Dead - I Just Want To Make Love To You 1966-11-29",
-            "Grateful Dead - The Centrum, Worchester, MA - I Just Want To Make Love To You  10-8-84"
-        ]
-    },
-    {
-        "song_title": "Drums",
-        "timestamp": "2026-03-13 10:31:34",
-        "reasons": [
-            "BPM Variance: 42.04 (limit 20)"
-        ],
-        "version_titles": [
-            "grateful dead alpine valley 1989 drums!",
-            "Grateful Dead - Drums - 10/31/1980 - Radio City Music Hall"
         ]
     }
 ]

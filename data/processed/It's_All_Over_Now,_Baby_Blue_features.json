@@ -54,5 +54,7 @@
         "lowlevel.loudness_ebu128.short_term.dvar2": 0.021647000685334206,
         "lowlevel.loudness_ebu128.integrated": -19.875186284383137,
         "rhythm.bpm_histogram_second_peak_weight": 0.019375586261351902
-    }
+    },
+    "outlier_reasons": null,
+    "outlier_flag": false
 }

@@ -230,5 +230,7 @@
                 "rhythm.danceability": 0.9532849192619324
             }
         }
-    ]
+    ],
+    "outlier_reasons": null,
+    "outlier_flag": false
 }
