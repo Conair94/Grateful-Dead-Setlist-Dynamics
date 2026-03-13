@@ -395,3 +395,39 @@ body.resizing-active #graph-container {
 .has-selection .node-label.connected:not(.selected) {
     fill: var(--accent-color);
 }
+.transition-item {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    list-style-type: none;
+    margin-left: -20px; /* Offset list padding */
+}
+
+.transition-item:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+body.light-mode .transition-item:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.transition-item span {
+    display: block;
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+.date-list {
+    margin-top: 5px;
+    padding-left: 15px;
+    font-size: 0.8rem;
+    color: var(--text-color);
+    border-left: 2px solid var(--border-color);
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.date-list div {
+    margin-bottom: 2px;
+}

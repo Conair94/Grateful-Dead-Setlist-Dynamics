@@ -22,8 +22,9 @@ This document tracks the progress, goals, and organizational structure of the ma
 
 ### Phase 1: Foundation & Analytics
 - [ ] **Grateful Dead Analytics:** Further work on existing data to deepen baseline insights.
-- [ ] **Cross-Band Data Acquisition:** Scrape setlist data for secondary bands (Phish, Phish.net API, Setlist.fm etc.) to enable comparative analysis.
-- [ ] **Website Expansion:** Redesign the current interface to allow for interactive data exploration and user engagement.
+- [ ] **Cross-Band Data Acquisition:** Scrape setlist data for secondary bands (Phish, Phish.net API, etc.) to enable comparative analysis.
+- [x] **Website Expansion (Phase 1a):** Added interactive transition inspection (click predecessors/successors to see concert dates).
+- [ ] **Website Expansion (Phase 1b):** Redesign the current interface for broader interactive data exploration.
 
 ### Phase 2: Data Engineering (The Pipeline)
 - [ ] **Audio Extraction Pipeline:**
@@ -74,6 +75,7 @@ To support the upcoming data processing pipeline and ML workflows, we will trans
 ---
 
 ## 📈 Current Status
-*   **Current Phase:** Phase 1 (Initial Setup & Logistics)
+*   **Current Phase:** Phase 1 (Foundation & Website Expansion)
 *   **Last Update:** 2026-03-12
-*   **Active Focus:** Establishing project organization and tracking.
+*   **Active Focus:** Enhancing interactive website features and preparing for cross-band data.
+*   **Recent Changes:** Implemented transition date inspection in the stats panel.

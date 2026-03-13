@@ -1,5 +1,6 @@
 let rawNodes = [];
 let rawEdges = [];
+let currentFilteredEdges = []; // Store the currently filtered edges globally
 let graphData = { nodes: [], links: [] };
 
 let simulation;
@@ -246,13 +247,15 @@ function updateGraph() {
     document.getElementById('stats-content').classList.add('hidden');
 
     // Filter edges based on date and segue
-    let filteredEdges = rawEdges.filter(e => {
+    currentFilteredEdges = rawEdges.filter(e => {
         const edgeMonth = e.date.substring(0, 7);
         if (startDate && edgeMonth < startDate) return false;
         if (endDate && edgeMonth > endDate) return false;
         if (segueOnly && !e.segue) return false;
         return true;
     });
+
+    let filteredEdges = currentFilteredEdges;
 
     // Aggregate edges to get weights
     let edgeCounts = {};
@@ -320,7 +323,7 @@ function updateGraph() {
             let rawNode = rawNodes.find(n => n.id === baseId);
             if (!rawNode) return;
 
-            let nodeObj = { ...rawNode, id: nodeId, baseId: baseId, degree: nodeDegrees[nodeId] || 0 };
+            let nodeObj = { ...rawNode, id: nodeId, baseId: baseId, setType: setType, degree: nodeDegrees[nodeId] || 0 };
             
             if (rawNode.type === 'special') {
                 nodeObj.type = 'special';
@@ -569,10 +572,10 @@ function showStats(nodeData) {
     
     graphData.links.forEach(l => {
         if (l.target.id === nodeData.id) {
-            incoming.push({ title: l.source.title, weight: l.weight });
+            incoming.push({ title: l.source.title, weight: l.weight, source: l.source, target: l.target });
             connectedNodeIds.add(l.source.id);
         } else if (l.source.id === nodeData.id) {
-            outgoing.push({ title: l.target.title, weight: l.weight });
+            outgoing.push({ title: l.target.title, weight: l.weight, source: l.source, target: l.target });
             connectedNodeIds.add(l.target.id);
         }
     });
@@ -600,19 +603,59 @@ function showStats(nodeData) {
 
     const prevList = document.getElementById('stat-prev');
     prevList.innerHTML = '';
-    incoming.slice(0, 5).forEach(i => {
+    incoming.slice(0, 10).forEach(i => {
         const li = document.createElement('li');
-        li.innerText = `${i.title} (${i.weight} times)`;
+        li.classList.add('transition-item');
+        li.innerHTML = `<span>← ${i.title} (${i.weight}x)</span><div class="date-list hidden"></div>`;
+        li.onclick = (e) => {
+            e.stopPropagation();
+            toggleTransitionDates(li, i.source, i.target);
+        };
         prevList.appendChild(li);
     });
 
     const nextList = document.getElementById('stat-next');
     nextList.innerHTML = '';
-    outgoing.slice(0, 5).forEach(o => {
+    outgoing.slice(0, 10).forEach(o => {
         const li = document.createElement('li');
-        li.innerText = `${o.title} (${o.weight} times)`;
+        li.classList.add('transition-item');
+        li.innerHTML = `<span>${o.title} (${o.weight}x) →</span><div class="date-list hidden"></div>`;
+        li.onclick = (e) => {
+            e.stopPropagation();
+            toggleTransitionDates(li, o.source, o.target);
+        };
         nextList.appendChild(li);
     });
+}
+
+function toggleTransitionDates(li, sourceNode, targetNode) {
+    const dateListDiv = li.querySelector('.date-list');
+    if (!dateListDiv.classList.contains('hidden')) {
+        dateListDiv.classList.add('hidden');
+        return;
+    }
+
+    // Filter raw edges from currently visible edges
+    const matches = currentFilteredEdges.filter(e => {
+        // Detailed mode matching
+        if (sourceNode.setType || targetNode.setType) {
+            const sMatch = (sourceNode.type === 'special' ? e.source === sourceNode.id : (e.source === sourceNode.baseId && e.set_type === sourceNode.setType));
+            const tMatch = (targetNode.type === 'special' ? e.target === targetNode.id : (e.target === targetNode.baseId && e.set_type === targetNode.setType));
+            return sMatch && tMatch;
+        }
+        // Raw mode matching
+        return e.source === sourceNode.id && e.target === targetNode.id;
+    });
+
+    // Sort by date
+    matches.sort((a, b) => a.date.localeCompare(b.date));
+
+    if (matches.length === 0) {
+        dateListDiv.innerHTML = "<div>No data found</div>";
+    } else {
+        dateListDiv.innerHTML = matches.map(m => `<div>${m.date.split('T')[0]}</div>`).join('');
+    }
+    dateListDiv.classList.remove('hidden');
 }
 
 function highlightNode() {
