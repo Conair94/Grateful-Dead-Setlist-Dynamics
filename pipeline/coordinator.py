@@ -105,10 +105,11 @@ def check_for_outliers(version_metadata):
         return None
         
     outlier_reasons = []
-    # Thresholds: BPM spread > 20, Danceability spread > 0.2
+    # Thresholds: Increased to account for Grateful Dead's stylistic evolution over 30 years.
+    # BPM spread > 60, Danceability spread > 0.4
     keys_to_check = [
-        ('rhythm.bpm', 20, "BPM Variance"),
-        ('rhythm.danceability', 0.2, "Danceability Variance")
+        ('rhythm.bpm', 60, "BPM Variance"),
+        ('rhythm.danceability', 0.4, "Danceability Variance")
     ]
     
     for key, threshold, label in keys_to_check:
