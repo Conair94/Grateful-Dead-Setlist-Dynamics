@@ -19,6 +19,15 @@ def extract_mood_features(audio_path):
     logging.info(f"Extracting features from: {audio_path}")
     
     try:
+        # Silence Essentia's internal C++ logging if possible
+        # Some versions allow: essentia.log.infoActive = False
+        try:
+            import essentia
+            essentia.log.infoActive = False
+            essentia.log.warningActive = False
+        except:
+            pass
+
         # Load audio
         loader = es.MonoLoader(filename=audio_path)
         audio = loader()

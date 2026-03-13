@@ -91,6 +91,8 @@ To support the upcoming data processing pipeline and ML workflows, we will trans
 *   **Last Update:** 2026-03-12
 *   **Active Focus:** Scaling the mood extraction pipeline to the full song catalog.
 *   **Recent Changes:** 
-    - Implemented `pipeline/coordinator.py` for full audio-to-feature workflow.
-    - Successfully extracted and averaged Essentia mood features for the first song ("It's A Sin").
-    - Integrated `yt-dlp` for robust YouTube searching and audio extraction.
+    - Implemented `pipeline/coordinator.py` with multi-threaded version processing.
+    - Added a clean TUI using `tqdm` with nested progress bars for songs and versions.
+    - Updated storage format to include both averaged "Song Fingerprints" and raw per-version feature data.
+    - Added `yt-dlp` duration filters (20m limit) to ensure reliable batch processing.
+    - Successfully processed 34 songs in initial test runs.

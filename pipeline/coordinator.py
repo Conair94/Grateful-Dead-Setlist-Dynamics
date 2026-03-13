@@ -4,6 +4,7 @@ import json
 import logging
 import numpy as np
 import shutil
+import argparse
 from pipeline.audio_fetcher.youtube_searcher import search_youtube_live, download_audio
 from pipeline.mood_extractor.essentia_processor import extract_mood_features
 
@@ -36,95 +37,148 @@ def average_features(feature_list):
             
     return averaged
 
+import time
+from datetime import timedelta
+import concurrent.futures
+from tqdm import tqdm
+
+def process_single_version(video, song_title, temp_dir):
+    """Worker function to process a single YouTube version."""
+    temp_audio_path = os.path.join(temp_dir, f"{video['id']}.wav")
+    
+    # Download at lower quality for faster turnaround
+    downloaded_path = download_audio(video['link'], temp_audio_path, temp_dir)
+    
+    if downloaded_path:
+        # Essentia features extraction
+        features = extract_mood_features(downloaded_path)
+        
+        # Clean up temp file immediately
+        if os.path.exists(downloaded_path):
+            try:
+                os.remove(downloaded_path)
+            except:
+                pass
+            
+        if features:
+            return {
+                'id': video['id'],
+                'title': video['title'],
+                'views': video['viewCount'],
+                'features': features
+            }
+    
+    return None
+
 def process_song_pipeline(song_title, artist="Grateful Dead", top_n=3, temp_dir="data/temp", output_dir="data/processed"):
-    """Run the full pipeline for a single song."""
+    """Run the full pipeline for a single song using parallel threads."""
     os.makedirs(temp_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
     
-    # Check if we already have this song processed
     output_filename = f"{song_title.replace(' ', '_').replace('/', '_')}_features.json"
     output_path = os.path.join(output_dir, output_filename)
     
     if os.path.exists(output_path):
-        logging.info(f"Features already exist for '{song_title}', skipping.")
-        return None
+        return "SKIPPED"
 
     # Step 1: Search
     results = search_youtube_live(song_title, artist, top_n)
     if not results:
-        logging.warning(f"Could not find any YouTube videos for '{song_title}'")
         return None
         
-    song_feature_vectors = []
+    version_metadata = []
     
-    # Step 2: Download & Extract
-    for idx, video in enumerate(results):
-        logging.info(f"Processing version {idx+1}/{len(results)}: {video['title']}")
+    # Step 2: Download & Extract (Parallelized)
+    # We remove the nested progress bar to keep it simple and avoid clogging
+    with concurrent.futures.ThreadPoolExecutor(max_workers=top_n) as executor:
+        future_to_video = {executor.submit(process_single_version, v, song_title, temp_dir): v for v in results}
         
-        temp_audio_path = os.path.join(temp_dir, f"{video['id']}.wav")
-        downloaded_path = download_audio(video['link'], temp_audio_path, temp_dir)
-        
-        if downloaded_path:
-            features = extract_mood_features(downloaded_path)
-            if features:
-                song_feature_vectors.append(features)
-            
-            # Clean up temp file immediately after extraction
-            if os.path.exists(downloaded_path):
-                os.remove(downloaded_path)
-        else:
-            logging.error(f"Failed to download/process video {video['id']}")
+        for future in concurrent.futures.as_completed(future_to_video):
+            try:
+                result = future.result()
+                if result:
+                    version_metadata.append(result)
+            except Exception as e:
+                logging.error(f"  Version processing error: {e}")
             
     # Step 3: Average and Save
-    if song_feature_vectors:
+    if version_metadata:
+        song_feature_vectors = [v['features'] for v in version_metadata]
         averaged_features = average_features(song_feature_vectors)
         
-        # Add metadata
         final_data = {
             'song_title': song_title,
             'artist': artist,
-            'num_versions_processed': len(song_feature_vectors),
-            'features': averaged_features
+            'num_versions_processed': len(version_metadata),
+            'average_features': averaged_features,
+            'raw_versions': version_metadata
         }
         
         with open(output_path, 'w') as f:
             json.dump(final_data, f, indent=4)
             
-        logging.info(f"Successfully processed '{song_title}' and saved to {output_path}")
         return final_data
     else:
-        logging.error(f"Failed to extract any features for '{song_title}'")
         return None
 
-import argparse
-
 def main():
-    """Main entry point for the pipeline with resume logic and processing limits."""
-    parser = argparse.ArgumentParser(description="Run the mood extraction pipeline for songs.")
-    parser.add_argument("--limit", type=int, default=3, help="Maximum number of NEW songs to process in this run.")
-    parser.add_argument("--artist", type=str, default="Grateful Dead", help="Artist name to search for.")
+    """Main entry point with clean TUI via tqdm."""
+    parser = argparse.ArgumentParser(description="Run the mood extraction pipeline.")
+    parser.add_argument("--limit", type=int, default=3, help="Max NEW songs to process.")
+    parser.add_argument("--artist", type=str, default="Grateful Dead", help="Artist to search.")
     args = parser.parse_args()
 
     songs = get_all_songs()
-    logging.info(f"Found {len(songs)} songs in the database.")
+    total_songs = len(songs)
     
+    output_dir = "data/processed"
+    os.makedirs(output_dir, exist_ok=True)
+    already_processed_files = [f for f in os.listdir(output_dir) if f.endswith('_features.json')]
+    already_processed_count = len(already_processed_files)
+    
+    # Filter songs to only those not yet processed
+    songs_to_process = [s for s in songs if s.replace(' ', '_').replace('/', '_').replace('?', '') not in [f.replace('_features.json', '') for f in already_processed_files]]
+    
+    print(f"\n🚀 Mood Extraction Pipeline (Optimized)")
+    print(f"📊 Total Catalog: {total_songs} | ✅ Done: {already_processed_count} | ⏳ Remaining: {len(songs_to_process)}")
+    
+    if args.limit > 0:
+        songs_to_process = songs_to_process[:args.limit]
+        print(f"🎯 Target for this run: {len(songs_to_process)} songs\n")
+
     processed_count = 0
+    start_time_run = time.time()
     
-    for song in songs:
-        if args.limit > 0 and processed_count >= args.limit:
-            logging.info(f"Reached limit of {args.limit} new songs. Stopping.")
-            break
+    # Use a single robust progress bar
+    with tqdm(total=len(songs_to_process), desc="Catalog Progress", unit="song", dynamic_ncols=True) as pbar:
+        for song in songs_to_process:
+            pbar.set_description(f"Working: {song[:25]}...")
+            song_start_time = time.time()
+            try:
+                result = process_song_pipeline(song, artist=args.artist)
+                
+                if result and result != "SKIPPED":
+                    processed_count += 1
+                    song_duration = time.time() - song_start_time
+                    
+                    # Update overall progress
+                    elapsed_run = time.time() - start_time_run
+                    avg_per_song = elapsed_run / processed_count
+                    pbar.set_postfix({"time": f"{song_duration:.1f}s", "avg": f"{avg_per_song:.1f}s"})
+                    
+                pbar.update(1)
+                    
+            except Exception as e:
+                logging.error(f"Error processing '{song}': {e}")
+                pbar.update(1)
             
-        try:
-            # process_song_pipeline returns None if song already exists
-            result = process_song_pipeline(song, artist=args.artist)
-            if result:
-                processed_count += 1
-                logging.info(f"Progress: {processed_count}/{args.limit} new songs processed.")
-        except Exception as e:
-            logging.error(f"Critical error processing '{song}': {e}")
+            # Short pause to prevent display flooding
+            time.sleep(0.1)
             
-    logging.info(f"Pipeline run complete. {processed_count} new songs added.")
+    total_duration = str(timedelta(seconds=int(time.time() - start_time_run)))
+    print(f"\n✅ Pipeline run complete!")
+    print(f"📦 New songs added: {processed_count}")
+    print(f"⏱ Total time: {total_duration}\n")
 
 if __name__ == "__main__":
     main()
