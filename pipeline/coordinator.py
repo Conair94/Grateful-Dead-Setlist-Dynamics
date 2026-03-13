@@ -70,6 +70,52 @@ def process_single_version(video, song_title, temp_dir):
     
     return None
 
+def log_outlier(song_title, reasons, output_dir="data/processed"):
+    """Log flagged songs to a central review file."""
+    log_path = os.path.join(output_dir, "outliers_for_review.json")
+    entry = {
+        "song_title": song_title,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "reasons": reasons
+    }
+    
+    data = []
+    if os.path.exists(log_path):
+        try:
+            with open(log_path, 'r') as f:
+                data = json.load(f)
+        except:
+            data = []
+            
+    data.append(entry)
+    with open(log_path, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def check_for_outliers(version_metadata):
+    """
+    Check if the 3 versions are wildly different across key 'Spotify-like' features.
+    Returns a list of reasons if outliers are found, else None.
+    """
+    if len(version_metadata) < 2:
+        return None
+        
+    outlier_reasons = []
+    # Thresholds: BPM spread > 20, Danceability spread > 0.2, Loudness spread > 6dB
+    keys_to_check = [
+        ('rhythm.bpm', 20, "BPM Variance"),
+        ('rhythm.danceability', 0.2, "Danceability Variance"),
+        ('lowlevel.loudness_ebu128.integrated', 6.0, "Loudness Variance")
+    ]
+    
+    for key, threshold, label in keys_to_check:
+        vals = [v['features'].get(key) for v in version_metadata if key in v['features']]
+        if len(vals) >= 2:
+            spread = max(vals) - min(vals)
+            if spread > threshold:
+                outlier_reasons.append(f"{label}: {spread:.2f} (limit {threshold})")
+                
+    return outlier_reasons if outlier_reasons else None
+
 def process_song_pipeline(song_title, artist="Grateful Dead", top_n=3, temp_dir="data/temp", output_dir="data/processed"):
     """Run the full pipeline for a single song using parallel threads."""
     os.makedirs(temp_dir, exist_ok=True)
@@ -89,7 +135,6 @@ def process_song_pipeline(song_title, artist="Grateful Dead", top_n=3, temp_dir=
     version_metadata = []
     
     # Step 2: Download & Extract (Parallelized)
-    # We remove the nested progress bar to keep it simple and avoid clogging
     with concurrent.futures.ThreadPoolExecutor(max_workers=top_n) as executor:
         future_to_video = {executor.submit(process_single_version, v, song_title, temp_dir): v for v in results}
         
@@ -106,13 +151,21 @@ def process_song_pipeline(song_title, artist="Grateful Dead", top_n=3, temp_dir=
         song_feature_vectors = [v['features'] for v in version_metadata]
         averaged_features = average_features(song_feature_vectors)
         
+        # Step 4: QA Check for Outliers
+        outlier_reasons = check_for_outliers(version_metadata)
+        
         final_data = {
             'song_title': song_title,
             'artist': artist,
             'num_versions_processed': len(version_metadata),
             'average_features': averaged_features,
+            'outlier_flag': outlier_reasons is not None,
+            'outlier_reasons': outlier_reasons,
             'raw_versions': version_metadata
         }
+        
+        if outlier_reasons:
+            log_outlier(song_title, outlier_reasons, output_dir)
         
         with open(output_path, 'w') as f:
             json.dump(final_data, f, indent=4)
