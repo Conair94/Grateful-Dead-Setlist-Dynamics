@@ -57,8 +57,7 @@
     },
     "outlier_flag": true,
     "outlier_reasons": [
-        "Danceability Variance: 0.20 (limit 0.2)",
-        "Loudness Variance: 13.30 (limit 6.0)"
+        "Danceability Variance: 0.20 (limit 0.2)"
     ],
     "raw_versions": [
         {

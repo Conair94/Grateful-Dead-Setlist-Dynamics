@@ -57,8 +57,7 @@
     },
     "outlier_flag": true,
     "outlier_reasons": [
-        "BPM Variance: 25.64 (limit 20)",
-        "Loudness Variance: 9.13 (limit 6.0)"
+        "BPM Variance: 25.64 (limit 20)"
     ],
     "raw_versions": [
         {

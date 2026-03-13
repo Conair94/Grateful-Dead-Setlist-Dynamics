@@ -58,8 +58,7 @@
     "outlier_flag": true,
     "outlier_reasons": [
         "BPM Variance: 59.11 (limit 20)",
-        "Danceability Variance: 0.33 (limit 0.2)",
-        "Loudness Variance: 18.79 (limit 6.0)"
+        "Danceability Variance: 0.33 (limit 0.2)"
     ],
     "raw_versions": [
         {
