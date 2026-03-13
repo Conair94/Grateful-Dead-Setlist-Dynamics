@@ -89,6 +89,23 @@ To support the upcoming data processing pipeline and ML workflows, we will trans
 
 ---
 
+## 💡 Potential Ideas
+
+These features and research directions are under consideration for future expansion:
+
+### Visualization Enhancements
+*   **Locked Song Tracking (Song Pinning):** [IMPLEMENTING] Select a song to "pin" at the center of the view. As the timeline animates, the camera stays locked on this song, allowing you to watch its specific transition neighborhood evolve across decades.
+*   **Delta Highlighting / Era Comparison:** [IMPLEMENTING] A mode that compares two distinct time slices. Highlights "New" songs/transitions in green (introduced in Period B) and "Retired" ones in red (present in Period A but gone in Period B).
+*   **Activity Heatmap / Timeline Brush:** Replace the linear scrubber with a histogram of concert density. Users can "brush" across the histogram to select time ranges, providing immediate visual feedback on the band's touring intensity.
+*   **Setlist "Energy Curve" Overlay:** An animated line graph that follows the "Generative Walk" or a historical show, mapping the extracted Essentia mood features (BPM, Danceability, Valence) in real-time.
+
+### Research & Data
+*   **Interactive Audio Previews:** Integrate small 30-second audio clips (extracted during the pipeline phase) into the node statistics panel.
+*   **Community Annotation Layer:** Allow users to "tag" specific transitions with historical context (e.g., "The first time they went into Terrapin from a space jam").
+*   **Cross-Band Similarity Engine:** Using the mood fingerprints to find "equivalent" songs in other bands (e.g., "What is the Phish equivalent of a 1974 Eyes of the World?").
+
+---
+
 ## 📈 Current Status
 *   **Current Phase:** Phase 2 (Data Engineering & Mood Extraction)
 *   **Last Update:** 2026-03-12

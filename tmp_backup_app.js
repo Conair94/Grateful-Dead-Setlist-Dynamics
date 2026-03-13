@@ -8,14 +8,6 @@ let svg, container;
 let nodeElements, linkElements, labelElements;
 let selectedNode = null; // Track currently selected node
 
-// Animation & Timeline State
-let uniqueDates = [];
-let isPlaying = false;
-let animInterval = null;
-
-// Layer Groups
-let linkGroup, nodeGroup, labelGroup;
-
 // Physics parameters
 let repulsionStrength = -300;
 let linkDistance = 100;
@@ -47,23 +39,6 @@ const zoom = d3.zoom()
 
 svg.call(zoom);
 
-// Defs and Layers
-container.append("defs").append("marker")
-    .attr("id", "end")
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 15)
-    .attr("refY", -0.5)
-    .attr("markerWidth", 4)
-    .attr("markerHeight", 4)
-    .attr("orient", "auto")
-    .append("path")
-    .attr("fill", "var(--link-color)")
-    .attr("d", "M0,-5L10,0L0,5");
-
-linkGroup = container.append("g").attr("class", "layer-links");
-nodeGroup = container.append("g").attr("class", "layer-nodes");
-labelGroup = container.append("g").attr("class", "layer-labels");
-
 // Initialize random 1-year timeframe to prevent initial lag
 const randomYear = Math.floor(Math.random() * (1995 - 1965 + 1)) + 1965;
 document.getElementById('start-date').value = `${randomYear}-01`;
@@ -73,16 +48,6 @@ document.getElementById('end-date').value = `${randomYear}-12`;
 d3.json("data/graph_data.json").then(data => {
     rawNodes = data.nodes;
     rawEdges = data.edges;
-
-    // Extract sorted unique dates for sliding window mode
-    uniqueDates = [...new Set(rawEdges.map(e => e.date.split('T')[0]))].sort();
-    
-    const scrubber = document.getElementById('timeline-scrubber');
-    const windowSizeEl = document.getElementById('window-size');
-    const windowSize = windowSizeEl ? parseInt(windowSizeEl.value) : 100;
-    if (scrubber) {
-        scrubber.max = Math.max(0, uniqueDates.length - windowSize);
-    }
 
     // Setup autocomplete list
     const datalist = document.getElementById('song-list');
@@ -105,101 +70,6 @@ function initEventListeners() {
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
             themeToggle.innerText = isLight ? '☀️' : '🌙';
-        });
-    }
-
-    // --- Timeline & Animation Controls ---
-    const timeMode = document.getElementById('time-mode');
-    if (timeMode) {
-        timeMode.addEventListener('change', (e) => {
-            if (e.target.value === 'range') {
-                document.getElementById('mode-range-container').classList.remove('hidden');
-                document.getElementById('mode-window-container').classList.add('hidden');
-            } else {
-                document.getElementById('mode-range-container').classList.add('hidden');
-                document.getElementById('mode-window-container').classList.remove('hidden');
-            }
-            updateGraph();
-        });
-    }
-
-    const windowSizeInput = document.getElementById('window-size');
-    if (windowSizeInput) {
-        windowSizeInput.addEventListener('input', (e) => {
-            document.getElementById('window-size-val').innerText = e.target.value;
-            const scrubber = document.getElementById('timeline-scrubber');
-            scrubber.max = Math.max(0, uniqueDates.length - parseInt(e.target.value));
-            if (parseInt(scrubber.value) > parseInt(scrubber.max)) {
-                scrubber.value = scrubber.max;
-            }
-            updateGraph();
-        });
-    }
-
-    const timelineScrubber = document.getElementById('timeline-scrubber');
-    if (timelineScrubber) {
-        timelineScrubber.addEventListener('input', updateGraph);
-    }
-
-    const animSpeed = document.getElementById('anim-speed');
-    if (animSpeed) {
-        animSpeed.addEventListener('input', (e) => {
-            document.getElementById('anim-speed-val').innerText = e.target.value;
-            if (isPlaying) {
-                clearInterval(animInterval);
-                animInterval = setInterval(stepAnimation, parseInt(e.target.value));
-            }
-        });
-    }
-
-    const btnPlay = document.getElementById('anim-play');
-    if (btnPlay) {
-        btnPlay.addEventListener('click', () => {
-            isPlaying = !isPlaying;
-            btnPlay.innerText = isPlaying ? "⏸ Pause" : "▶ Play";
-            if (isPlaying) {
-                animInterval = setInterval(stepAnimation, parseInt(document.getElementById('anim-speed').value));
-            } else {
-                clearInterval(animInterval);
-            }
-        });
-    }
-
-    const btnPrev = document.getElementById('anim-prev');
-    if (btnPrev) {
-        btnPrev.addEventListener('click', () => {
-            const scrubber = document.getElementById('timeline-scrubber');
-            scrubber.value = Math.max(0, parseInt(scrubber.value) - 1);
-            updateGraph();
-        });
-    }
-
-    const btnNext = document.getElementById('anim-next');
-    if (btnNext) {
-        btnNext.addEventListener('click', stepAnimation);
-    }
-
-    const btnJumpDate = document.getElementById('btn-jump-date');
-    if (btnJumpDate) {
-        btnJumpDate.addEventListener('click', () => {
-            const targetDate = document.getElementById('jump-to-date').value;
-            if (!targetDate || uniqueDates.length === 0) return;
-            
-            let closestIdx = 0;
-            let minDiff = Infinity;
-            const targetTime = new Date(targetDate).getTime();
-            
-            for (let i = 0; i < uniqueDates.length; i++) {
-                const diff = Math.abs(new Date(uniqueDates[i]).getTime() - targetTime);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    closestIdx = i;
-                }
-            }
-            
-            const scrubber = document.getElementById('timeline-scrubber');
-            scrubber.value = Math.min(closestIdx, parseInt(scrubber.max));
-            updateGraph();
         });
     }
 
@@ -294,21 +164,6 @@ function initEventListeners() {
 
 initEventListeners();
 
-function stepAnimation() {
-    const scrubber = document.getElementById('timeline-scrubber');
-    if (!scrubber) return;
-    
-    let val = parseInt(scrubber.value);
-    if (val >= parseInt(scrubber.max)) {
-        if (isPlaying) {
-            document.getElementById('anim-play').click(); // trigger pause
-        }
-        return;
-    }
-    scrubber.value = val + 1;
-    updateGraph();
-}
-
 // Sidebar Resizer Logic
 const sidebar = document.getElementById('sidebar');
 const resizer = document.getElementById('sidebar-resizer');
@@ -381,8 +236,8 @@ window.addEventListener('resize', () => {
 });
 
 function updateGraph() {
-    const timeModeElement = document.getElementById('time-mode');
-    const timeMode = timeModeElement ? timeModeElement.value : 'range';
+    const startDate = document.getElementById('start-date').value;
+    const endDate = document.getElementById('end-date').value;
     const segueOnly = document.getElementById('segue-only').checked;
     const graphMode = document.getElementById('graph-mode').value;
     
@@ -391,38 +246,14 @@ function updateGraph() {
     document.getElementById('stats-placeholder').classList.remove('hidden');
     document.getElementById('stats-content').classList.add('hidden');
 
-    // Filter edges
-    if (timeMode === 'range') {
-        const startDate = document.getElementById('start-date').value;
-        const endDate = document.getElementById('end-date').value;
-        currentFilteredEdges = rawEdges.filter(e => {
-            const edgeMonth = e.date.substring(0, 7);
-            if (startDate && edgeMonth < startDate) return false;
-            if (endDate && edgeMonth > endDate) return false;
-            if (segueOnly && !e.segue) return false;
-            return true;
-        });
-    } else {
-        const scrubberIdx = parseInt(document.getElementById('timeline-scrubber').value) || 0;
-        const windowSize = parseInt(document.getElementById('window-size').value) || 100;
-        
-        if (uniqueDates.length > 0) {
-            const startD = uniqueDates[scrubberIdx];
-            const endD = uniqueDates[Math.min(scrubberIdx + windowSize - 1, uniqueDates.length - 1)];
-            
-            const displayEl = document.getElementById('window-date-display');
-            if (displayEl) displayEl.innerText = `${startD} to ${endD}`;
-            
-            currentFilteredEdges = rawEdges.filter(e => {
-                const d = e.date.split('T')[0];
-                if (d < startD || d > endD) return false;
-                if (segueOnly && !e.segue) return false;
-                return true;
-            });
-        } else {
-            currentFilteredEdges = [];
-        }
-    }
+    // Filter edges based on date and segue
+    currentFilteredEdges = rawEdges.filter(e => {
+        const edgeMonth = e.date.substring(0, 7);
+        if (startDate && edgeMonth < startDate) return false;
+        if (endDate && edgeMonth > endDate) return false;
+        if (segueOnly && !e.segue) return false;
+        return true;
+    });
 
     let filteredEdges = currentFilteredEdges;
 
@@ -476,11 +307,6 @@ function updateGraph() {
         }
     });
 
-    let oldNodesMap = new Map();
-    if (graphData && graphData.nodes) {
-        graphData.nodes.forEach(n => oldNodesMap.set(n.id, n));
-    }
-
     let activeNodesMap = new Map();
     
     Object.keys(nodeDegrees).forEach(nodeId => {
@@ -497,26 +323,17 @@ function updateGraph() {
             let rawNode = rawNodes.find(n => n.id === baseId);
             if (!rawNode) return;
 
-            let nodeObj;
-            if (oldNodesMap.has(nodeId)) {
-                nodeObj = oldNodesMap.get(nodeId);
-                nodeObj.degree = nodeDegrees[nodeId] || 0;
+            let nodeObj = { ...rawNode, id: nodeId, baseId: baseId, setType: setType, degree: nodeDegrees[nodeId] || 0 };
+            
+            if (rawNode.type === 'special') {
+                nodeObj.type = 'special';
+                // Provide initial starting positions to orient the graph, but leave them unfixed
+                if (nodeId === 'START') { nodeObj.x = width * -0.5; nodeObj.y = height / 2; }
+                else if (nodeId === 'SET_BREAK') { nodeObj.x = width * 0.5; nodeObj.y = height / 2; }
+                else if (nodeId === 'ENCORE_BREAK') { nodeObj.x = width * 1.5; nodeObj.y = height / 2; }
+                else if (nodeId === 'END') { nodeObj.x = width * 2.5; nodeObj.y = height / 2; }
             } else {
-                nodeObj = { ...rawNode, id: nodeId, baseId: baseId, setType: setType, degree: nodeDegrees[nodeId] || 0 };
-                
-                if (rawNode.type === 'special') {
-                    nodeObj.type = 'special';
-                    if (nodeId === 'START') { nodeObj.x = width * -0.5; nodeObj.y = height / 2; }
-                    else if (nodeId === 'SET_BREAK') { nodeObj.x = width * 0.5; nodeObj.y = height / 2; }
-                    else if (nodeId === 'ENCORE_BREAK') { nodeObj.x = width * 1.5; nodeObj.y = height / 2; }
-                    else if (nodeId === 'END') { nodeObj.x = width * 2.5; nodeObj.y = height / 2; }
-                } else {
-                    nodeObj.x = width / 2 + (Math.random() - 0.5) * 20;
-                    nodeObj.y = height / 2 + (Math.random() - 0.5) * 20;
-                }
-            }
-
-            if (nodeObj.type !== 'special') {
+                // Set probability calc
                 let s1 = nodeSetStats[nodeId] ? nodeSetStats[nodeId].set1 : 0;
                 let s2 = nodeSetStats[nodeId] ? nodeSetStats[nodeId].set2plus : 0;
                 let total = s1 + s2;
@@ -524,11 +341,13 @@ function updateGraph() {
                 nodeObj.set2Plays = s2;
                 nodeObj.setRatio = total > 0 ? s1 / total : 0.5;
 
+                // Position Average calc for Detailed Mode coloring
                 let pSum = nodeSetStats[nodeId] ? nodeSetStats[nodeId].posSum : 0;
                 let pCount = nodeSetStats[nodeId] ? nodeSetStats[nodeId].posCount : 0;
                 nodeObj.posAvg = pCount > 0 ? pSum / pCount : 0.5;
 
-                if (!oldNodesMap.has(nodeId) && graphMode === 'detailed') {
+                // Adjust title for detailed view
+                if (graphMode === 'detailed') {
                     if (setType === 'set1') nodeObj.title += " (Set 1)";
                     else if (setType === 'set2') nodeObj.title += " (Set 2)";
                     else if (setType === 'epilogue') nodeObj.title += " (Encore)";
@@ -541,7 +360,6 @@ function updateGraph() {
 
     let links = Object.values(edgeCounts).map(e => {
         return {
-            id: e.source + "|||" + e.target,
             source: activeNodesMap.get(e.source),
             target: activeNodesMap.get(e.target),
             weight: e.weight,
@@ -558,39 +376,38 @@ function updateGraph() {
 }
 
 function renderGraph() {
-    // Links Join
-    const links = linkGroup.selectAll("line")
-        .data(graphData.links, d => d.id);
+    container.selectAll("*").remove();
 
-    links.exit()
-        .transition().duration(300)
-        .style("stroke-opacity", 0)
-        .remove();
+    // Arrows
+    container.append("defs").selectAll("marker")
+        .data(["end"])
+        .enter().append("marker")
+        .attr("id", String)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 15)
+        .attr("refY", -0.5)
+        .attr("markerWidth", 4)
+        .attr("markerHeight", 4)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("fill", "var(--link-color)")
+        .attr("d", "M0,-5L10,0L0,5");
 
-    const linksEnter = links.enter().append("line")
+    linkElements = container.append("g")
+        .selectAll("line")
+        .data(graphData.links)
+        .enter().append("line")
         .attr("class", d => d.segue ? "link segue" : "link")
-        .attr("marker-end", "url(#end)")
-        .style("stroke-opacity", 0);
-
-    linkElements = linksEnter.merge(links);
-    
-    linkElements.transition().duration(300)
         .attr("stroke-width", d => Math.sqrt(d.weight) + 0.5)
-        .style("stroke-opacity", d => d.segue ? 0.8 : 0.6);
+        .attr("marker-end", "url(#end)");
 
-    // Nodes Join
-    const nodes = nodeGroup.selectAll("circle")
-        .data(graphData.nodes, d => d.id);
-
-    nodes.exit()
-        .transition().duration(300)
-        .attr("r", 0)
-        .remove();
-
-    const nodesEnter = nodes.enter().append("circle")
+    nodeElements = container.append("g")
+        .selectAll("circle")
+        .data(graphData.nodes)
+        .enter().append("circle")
         .attr("class", d => d.type === 'special' ? 'node node-special' : 'node node-song')
         .attr("id", d => `node-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
-        .attr("r", 0)
+        .attr("r", d => d.type === 'special' ? 12 : Math.max(3, Math.min(15, Math.sqrt(d.degree))))
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
@@ -600,64 +417,43 @@ function renderGraph() {
             showStats(d);
         });
 
-    nodesEnter.append("title");
-
-    nodeElements = nodesEnter.merge(nodes);
-    nodeElements.select("title").text(d => d.title + " (" + d.degree + " plays)");
-
-    nodeElements.transition().duration(300)
-        .attr("r", d => d.type === 'special' ? 12 : Math.max(3, Math.min(15, Math.sqrt(d.degree))));
-
-    updateNodeColors();
-
-    // Labels Join
-    const labels = labelGroup.selectAll("text")
-        .data(graphData.nodes, d => d.id);
-
-    labels.exit()
-        .transition().duration(300)
-        .style("opacity", 0)
-        .remove();
-
-    const labelsEnter = labels.enter().append("text")
+    labelElements = container.append("g")
+        .selectAll("text")
+        .data(graphData.nodes)
+        .enter().append("text")
         .attr("class", d => d.type === 'special' ? 'special-label' : 'node-label')
         .attr("id", d => `label-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
+        .text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
         .attr("dx", 12)
-        .attr("dy", ".35em")
-        .style("opacity", 0);
+        .attr("dy", ".35em");
 
-    labelElements = labelsEnter.merge(labels);
-    labelElements.text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
-        .transition().duration(300)
-        .style("opacity", 1);
+    nodeElements.append("title")
+        .text(d => d.title + " (" + d.degree + " plays)");
 
-    // Simulation Update
-    if (!simulation) {
-        simulation = d3.forceSimulation(graphData.nodes)
-            .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
-            .force("charge", d3.forceManyBody().strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength))
-            .force("x", d3.forceX(d => {
-                if (d.id === 'START') return width * -0.5;
-                if (d.id === 'SET_BREAK') return width * 0.5;
-                if (d.id === 'ENCORE_BREAK') return width * 1.5;
-                if (d.id === 'END') return width * 2.5;
-                return width / 2;
-            }).strength(d => d.type === 'special' ? 0.3 : 0))
-            .force("center", d3.forceCenter(width / 2, height / 2))
-            .force("collide", d3.forceCollide().radius(d => d.type === 'special' ? 15 : Math.sqrt(d.degree) + 2))
-            .on("tick", ticked);
-    } else {
-        simulation.nodes(graphData.nodes);
-        simulation.force("link").links(graphData.links);
-        simulation.alpha(0.3).restart();
-    }
+    // Force color update on render
+    document.getElementById('color-mapping').value = 'set-probability';
+    updateNodeColors();
+
+    if (simulation) simulation.stop();
+
+    simulation = d3.forceSimulation(graphData.nodes)
+        .force("link", d3.forceLink(graphData.links).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
+        .force("charge", d3.forceManyBody().strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength))
+        .force("x", d3.forceX(d => {
+            if (d.id === 'START') return width * -0.5;
+            if (d.id === 'SET_BREAK') return width * 0.5;
+            if (d.id === 'ENCORE_BREAK') return width * 1.5;
+            if (d.id === 'END') return width * 2.5;
+            return width / 2;
+        }).strength(d => d.type === 'special' ? 0.3 : 0))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collide", d3.forceCollide().radius(d => d.type === 'special' ? 15 : Math.sqrt(d.degree) + 2))
+        .on("tick", ticked);
 }
 
 function updateNodeColors() {
-    const colorModeEl = document.getElementById('color-mapping');
-    const colorMode = colorModeEl ? colorModeEl.value : 'set-probability';
-    const graphModeEl = document.getElementById('graph-mode');
-    const graphMode = graphModeEl ? graphModeEl.value : 'detailed';
+    const colorMode = document.getElementById('color-mapping').value;
+    const graphMode = document.getElementById('graph-mode').value;
     
     // Set 1 / Start = Red
     // Set 2 / End = Blue
@@ -668,23 +464,30 @@ function updateNodeColors() {
     nodeElements.style("fill", d => {
         if (colorMode === 'set-probability') {
             if (d.type === 'special') {
-                if (d.id === 'START') return `rgb(${r1},${g1},${b1})`; 
-                if (d.id === 'SET_BREAK') return `rgb(166, 121, 166)`; 
-                if (d.id === 'ENCORE_BREAK') return `rgb(100, 140, 200)`; 
-                if (d.id === 'END') return `rgb(${r2},${g2},${b2})`; 
+                // Special Node Gradient
+                if (d.id === 'START') return `rgb(${r1},${g1},${b1})`; // Red
+                if (d.id === 'SET_BREAK') return `rgb(166, 121, 166)`; // Purpleish
+                if (d.id === 'ENCORE_BREAK') return `rgb(100, 140, 200)`; // Light Blue
+                if (d.id === 'END') return `rgb(${r2},${g2},${b2})`; // Blue
             } else {
-                let ratio = d.setRatio; 
+                let ratio = d.setRatio; // Used for Raw mode (Set 1 vs 2)
+
                 if (graphMode === 'detailed') {
+                    // In detailed mode, use the positional average (0.0 = start, 1.0 = end)
+                    // Reverse it so 1.0 maps to Red, 0.0 to Blue, to match Set1 vs Set2 colors
                     ratio = 1.0 - d.posAvg;
                 }
+
                 const r = Math.round(r1 * ratio + r2 * (1 - ratio));
                 const g = Math.round(g1 * ratio + g2 * (1 - ratio));
                 const b = Math.round(b1 * ratio + b2 * (1 - ratio));
                 return `rgb(${r},${g},${b})`;
             }
         }
+        
+        // Reset special nodes to default if not in custom color mode
         if (d.type === 'special') return null; 
-        return null; 
+        return null; // Removes inline style, falling back to CSS variables
     });
 }
 
@@ -738,6 +541,7 @@ function clearSelection() {
     linkElements.classed('connected', false).classed('walk-active', false).style("stroke", null);
     labelElements.classed('connected', false).text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""));
 
+    // Remove any walk elements
     container.selectAll(".walker").remove();
 }
 
@@ -831,15 +635,19 @@ function toggleTransitionDates(li, sourceNode, targetNode) {
         return;
     }
 
+    // Filter raw edges from currently visible edges
     const matches = currentFilteredEdges.filter(e => {
+        // Detailed mode matching
         if (sourceNode.setType || targetNode.setType) {
             const sMatch = (sourceNode.type === 'special' ? e.source === sourceNode.id : (e.source === sourceNode.baseId && e.set_type === sourceNode.setType));
             const tMatch = (targetNode.type === 'special' ? e.target === targetNode.id : (e.target === targetNode.baseId && e.set_type === targetNode.setType));
             return sMatch && tMatch;
         }
+        // Raw mode matching
         return e.source === sourceNode.id && e.target === targetNode.id;
     });
 
+    // Sort by date
     matches.sort((a, b) => a.date.localeCompare(b.date));
 
     if (matches.length === 0) {
@@ -880,8 +688,9 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
     const walkDuration = parseInt(document.getElementById('walk-speed').value) || 800;
     document.getElementById('generated-setlist-output').classList.remove('hidden');
     const ul = document.getElementById('generated-list');
-    ul.innerHTML = '';
+    ul.innerHTML = ''; // clear previous
     
+    // Highlight modes
     clearSelection();
     container.classed('has-selection', true);
 
@@ -891,10 +700,12 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
     let currentNode = startNode;
     let maxSteps = 50;
     
+    // Tracking state for realistic rules
     let currentSet = 1;
     let songsInCurrentSet = 0;
     const includeEpilogue = document.getElementById('include-epilogue').checked;
     
+    // Create the "walker" dot
     const walkerColor = enforceRealisticRules ? "#ff8c00" : "#00ffcc";
     const walker = container.append("circle")
         .attr("class", "walker")
@@ -907,6 +718,7 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
         .style("filter", `drop-shadow(0 0 5px ${walkerColor})`);
 
     while (currentNode.id !== 'END' && maxSteps > 0) {
+        // Find possible outgoing links
         let options = graphData.links.filter(l => l.source.id === currentNode.id);
         
         if (enforceRealisticRules) {
@@ -914,18 +726,23 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
                 const targetId = l.target.id;
                 const targetTitle = l.target.title ? l.target.title.toLowerCase() : "";
                 
+                // Rule 1: Drums/Space only allowed in Set 2
                 if (currentSet === 1 && (targetTitle.includes('drums') || targetTitle.includes('space'))) {
                     return false;
                 }
                 
+                // Rule 2: Minimum 4 songs per set (prevent early SET_BREAK, ENCORE_BREAK or END)
                 if ((targetId === 'SET_BREAK' || targetId === 'ENCORE_BREAK' || targetId === 'END') && songsInCurrentSet < 4) {
                     return false;
                 }
                 
+                // Rule 3: Max 2 sets (SET_BREAK from set 2 must not lead to another set)
+                // We handle this by ensuring if we are in set 2, we don't go to SET_BREAK
                 if (currentSet >= 2 && targetId === 'SET_BREAK') {
                     return false;
                 }
 
+                // Rule 4: Epilogue Toggle
                 if (!includeEpilogue && targetId === 'ENCORE_BREAK') {
                     return false;
                 }
@@ -933,15 +750,18 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
                 return true;
             });
             
+            // If rules filter out ALL options, fallback to any available option to prevent infinite stall
             if (options.length === 0) {
                  options = graphData.links.filter(l => l.source.id === currentNode.id);
             }
         }
         
-        if (options.length === 0) break;
+        if (options.length === 0) break; // Dead end
 
+        // Calculate total weight
         const totalWeight = options.reduce((sum, l) => sum + l.weight, 0);
         
+        // Random selection based on weight
         let rand = Math.random() * totalWeight;
         let selectedLink = options[0];
         
@@ -955,6 +775,7 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
 
         const nextNode = selectedLink.target;
         
+        // Update State
         if (nextNode.id === 'SET_BREAK' || nextNode.id === 'ENCORE_BREAK') {
             currentSet++;
             songsInCurrentSet = 0;
@@ -962,17 +783,20 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
             songsInCurrentSet++;
         }
         
+        // Animate walker to next node AND pan camera
         await new Promise(resolve => {
+            // Pan camera to follow node
             const transform = d3.zoomIdentity
-                .translate(width / 2, height / 2)
-                .scale(1)
-                .translate(-nextNode.x, -nextNode.y);
+                .translate(width / 2, height / 2) // Center of screen
+                .scale(1) // Keep current zoom level
+                .translate(-nextNode.x, -nextNode.y); // Move to node
 
             svg.transition()
                 .duration(walkDuration)
                 .ease(d3.easeCubicInOut)
                 .call(zoom.transform, transform);
 
+            // Move walker dot
             walker.transition()
                 .duration(walkDuration)
                 .ease(d3.easeCubicInOut)
@@ -981,11 +805,13 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
                 .on("end", resolve);
         });
 
+        // Add to UI List
         if (nextNode.type !== 'special') {
             const li = document.createElement('li');
             li.innerText = nextNode.title.replace(' (Set 1)', '').replace(' (Set 2)', '').replace(' (Encore)', '');
             if (selectedLink.segue) li.innerText += " ->";
             ul.appendChild(li);
+            // Scroll to bottom
             ul.parentElement.scrollTop = ul.parentElement.scrollHeight;
         } else if (nextNode.id === 'SET_BREAK') {
             const li = document.createElement('li');
@@ -999,9 +825,11 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
             ul.appendChild(li);
         }
 
+        // Highlight the path permanently for this run
         nodeElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true);
         labelElements.filter(d => d.id === currentNode.id || d.id === nextNode.id).classed('connected', true).text(d => d.title);
         
+        // Color the path orange if realistic, cyan if random
         linkElements.filter(l => l === selectedLink)
             .classed('walk-active', true)
             .classed('connected', true)
@@ -1011,6 +839,7 @@ async function generateSetlistWalk(enforceRealisticRules = false) {
         maxSteps--;
     }
     
+    // Walker explodes at the end
     walker.transition()
         .duration(500)
         .attr("r", 30)

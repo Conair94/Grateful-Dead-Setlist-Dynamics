@@ -217,7 +217,7 @@ h2 {
     gap: 10px;
 }
 
-input[type="month"], input[type="text"], select {
+input[type="month"], input[type="date"], input[type="text"], select {
     background: var(--input-bg);
     color: var(--text-color);
     border: 1px solid var(--border-color);
