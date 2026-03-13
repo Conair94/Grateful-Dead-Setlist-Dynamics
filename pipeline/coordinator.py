@@ -42,6 +42,21 @@ from datetime import timedelta
 import concurrent.futures
 from tqdm import tqdm
 
+class TqdmLoggingHandler(logging.Handler):
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            tqdm.write(msg)
+            self.flush()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
+
+def get_output_filename(song_title):
+    """Generate the standardized output filename for a song."""
+    return f"{song_title.replace(' ', '_').replace('/', '_')}_features.json"
+
 def process_single_version(video, song_title, temp_dir):
     """Worker function to process a single YouTube version."""
     temp_audio_path = os.path.join(temp_dir, f"{video['id']}.wav")
@@ -126,7 +141,7 @@ def process_song_pipeline(song_title, artist="Grateful Dead", top_n=3, temp_dir=
     os.makedirs(temp_dir, exist_ok=True)
     os.makedirs(output_dir, exist_ok=True)
     
-    output_filename = f"{song_title.replace(' ', '_').replace('/', '_')}_features.json"
+    output_filename = get_output_filename(song_title)
     output_path = os.path.join(output_dir, output_filename)
     
     if os.path.exists(output_path):
@@ -184,18 +199,30 @@ def main():
     parser = argparse.ArgumentParser(description="Run the mood extraction pipeline.")
     parser.add_argument("--limit", type=int, default=3, help="Max NEW songs to process.")
     parser.add_argument("--artist", type=str, default="Grateful Dead", help="Artist to search.")
+    parser.add_argument("--verbose", action="store_true", help="Show all logs.")
     args = parser.parse_args()
 
-    songs = get_all_songs()
+    # Setup Tqdm Logging
+    log_level = logging.INFO
+    root_logger = logging.getLogger()
+    for h in root_logger.handlers[:]:
+        root_logger.removeHandler(h)
+    
+    tqdm_handler = TqdmLoggingHandler()
+    tqdm_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    root_logger.addHandler(tqdm_handler)
+    root_logger.setLevel(log_level)
+
+    songs = list(dict.fromkeys(get_all_songs())) # Unique titles
     total_songs = len(songs)
     
     output_dir = "data/processed"
     os.makedirs(output_dir, exist_ok=True)
-    already_processed_files = [f for f in os.listdir(output_dir) if f.endswith('_features.json')]
+    already_processed_files = {f for f in os.listdir(output_dir) if f.endswith('_features.json')}
     already_processed_count = len(already_processed_files)
     
-    # Filter songs to only those not yet processed
-    songs_to_process = [s for s in songs if s.replace(' ', '_').replace('/', '_').replace('?', '') not in [f.replace('_features.json', '') for f in already_processed_files]]
+    # Filter songs to only those not yet processed using the same logic as the pipeline
+    songs_to_process = [s for s in songs if get_output_filename(s) not in already_processed_files]
     
     print(f"\n🚀 Mood Extraction Pipeline (Optimized)")
     print(f"📊 Total Catalog: {total_songs} | ✅ Done: {already_processed_count} | ⏳ Remaining: {len(songs_to_process)}")
@@ -203,6 +230,8 @@ def main():
     if args.limit > 0:
         songs_to_process = songs_to_process[:args.limit]
         print(f"🎯 Target for this run: {len(songs_to_process)} songs\n")
+    else:
+        print(f"🎯 Target for this run: ALL {len(songs_to_process)} remaining songs\n")
 
     processed_count = 0
     start_time_run = time.time()
@@ -222,8 +251,8 @@ def main():
                     # Update overall progress
                     elapsed_run = time.time() - start_time_run
                     avg_per_song = elapsed_run / processed_count
-                    pbar.set_postfix({"time": f"{song_duration:.1f}s", "avg": f"{avg_per_song:.1f}s"})
-                    
+                    pbar.set_postfix({"last_song": f"{song_duration:.1f}s", "avg": f"{avg_per_song:.1f}s"})
+                
                 pbar.update(1)
                     
             except Exception as e:
