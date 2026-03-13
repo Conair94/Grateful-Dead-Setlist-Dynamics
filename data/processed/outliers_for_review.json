@@ -45,5 +45,88 @@
             "Good Lovin' - Grateful Dead - 10-31-1980 Radio City, NY set3-10",
             "Grateful Dead [4k Remaster] Good Lovin'  -1981 03 28  - (pro shot) Rockpalast {Essen, GERMANY}"
         ]
+    },
+    {
+        "song_title": "China Cat Sunflower Jam",
+        "timestamp": "2026-03-13 10:51:20",
+        "reasons": [
+            "BPM Variance: 69.56 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead - China Cat Sunflower/I Know You Rider (Winterland 10/17/74)",
+            "Grateful Dead - China Cat Sunflower/I Know You Rider (Louisville, KY 7/6/90)"
+        ]
+    },
+    {
+        "song_title": "Goin' Down The Road Feeling Bad",
+        "timestamp": "2026-03-13 10:53:31",
+        "reasons": [
+            "BPM Variance: 87.55 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead [4K Remaster]  Goin Down The Road Feelin' Bad - 74 Winterland [Pro Shot]",
+            "Grateful Dead- Going Down the Road- alpine valley '89",
+            "Going Down The Road Feeling Bad (Live on Letterman)"
+        ]
+    },
+    {
+        "song_title": "Comes A Time",
+        "timestamp": "2026-03-13 11:08:43",
+        "reasons": [
+            "BPM Variance: 107.42 (limit 60)"
+        ],
+        "version_titles": [
+            "Comes a Time ~ (2 cam) - Grateful Dead - 12-27-1986 Kaiser Conv. Center, Oakland, Ca. (set2-10)",
+            "Grateful Dead - Comes A Time - 9/16/91",
+            "Comes a Time \u262e Grateful Dead, 1977"
+        ]
+    },
+    {
+        "song_title": "Looks Like Rain",
+        "timestamp": "2026-03-13 11:13:25",
+        "reasons": [
+            "BPM Variance: 88.31 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead - Looks Like Rain (Live at Oakland & Anaheim, CA, 7/24 & 7/26/1987) [Official Video]",
+            "Grateful Dead - Looks Like Rain (Giza, Egypt 9/15, 16/1978)",
+            "Grateful Dead - Looks Like Rain (8-8-1982 at Alpine Valley Music Theatre)"
+        ]
+    },
+    {
+        "song_title": "I've Seen Them All",
+        "timestamp": "2026-03-13 11:14:35",
+        "reasons": [
+            "Danceability Variance: 0.52 (limit 0.4)"
+        ],
+        "version_titles": [
+            "Bjork - I've Seen It All (Live at Oscar 2000)",
+            "Schiller And Maya Saban - I've Seen It All (live)",
+            "Schiller - I've seen it all (live) performed by Tricia Mc Teague"
+        ]
+    },
+    {
+        "song_title": "Stella Blue",
+        "timestamp": "2026-03-13 11:20:14",
+        "reasons": [
+            "BPM Variance: 61.70 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead [4k Remaster]  Stella Blue - Winterland 1974",
+            "Stella Blue - Grateful Dead - 9-19-1990 Madison Sq. Garden, NY, set 2-19",
+            "Stella Blue, 5/13/77 \u262e Grateful Dead - HD/HQ"
+        ]
+    },
+    {
+        "song_title": "Man Smart (Woman Smarter)",
+        "timestamp": "2026-03-13 11:22:45",
+        "reasons": [
+            "BPM Variance: 64.44 (limit 60)"
+        ],
+        "version_titles": [
+            "Harry Belafonte - Man Smart (Woman Smarter) (Live)",
+            "Grateful Dead - Man Smart, Woman Smarter (Orchard Park, NY, 7/4/89)",
+            "Grateful Dead - Man Smart Woman Smarter (Live at Cardinal; Louisville, KY 07/06/90) [Official Video]"
+        ]
     }
 ]
