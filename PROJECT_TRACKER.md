@@ -34,11 +34,14 @@ This document tracks the progress, goals, and organizational structure of the ma
     *   [x] **Search Strategy:** Use YouTube to find "Song Name + Artist + Live".
     *   [x] **Fallback Logic:** If primary search fails, fall back to "Song Name + Live" to ensure at least 3 versions are found.
     *   [x] **Fetch Logic:** Implement a download module (using `yt-dlp`) for temporary audio extraction.
+        *   **Optimization:** Configured to download low-bitrate audio for faster processing.
+        *   **Safety:** Added 40-minute duration limit to avoid accidental compilation downloads.
     *   [x] **Popularity Filtering:** Fetch the 3 most popular/relevant videos per song.
 *   **Feature Engineering:**
     *   [x] **Mood Extraction:** Use **Essentia** to extract mood feature vectors (Danceability, Energy, BPM, Valence/Mood, Loudness).
     *   [x] **Ensemble Averaging:** Average the feature vectors from the 3 performances to create a robust "Song Fingerprint."
-    *   [x] **Storage:** Save averaged feature data to `data/processed/` in JSON format.
+    *   [x] **Data Quality (QA):** Implemented outlier detection (BPM, Danceability, Loudness variance) with a central review log (`outliers_for_review.json`).
+    *   [x] **Storage:** Save averaged feature data and raw per-version vectors to `data/processed/` in JSON format.
     *   **Era-Normalization:**
         *   Develop methods to distinguish between "performance mood" and "recording quality/production style" across decades.
 
@@ -89,10 +92,10 @@ To support the upcoming data processing pipeline and ML workflows, we will trans
 ## 📈 Current Status
 *   **Current Phase:** Phase 2 (Data Engineering & Mood Extraction)
 *   **Last Update:** 2026-03-12
-*   **Active Focus:** Scaling the mood extraction pipeline to the full song catalog.
+*   **Active Focus:** Executing full-scale batch processing of the entire catalog.
 *   **Recent Changes:** 
-    - Implemented `pipeline/coordinator.py` with multi-threaded version processing.
-    - Added a clean TUI using `tqdm` with nested progress bars for songs and versions.
-    - Updated storage format to include both averaged "Song Fingerprints" and raw per-version feature data.
-    - Added `yt-dlp` duration filters (20m limit) to ensure reliable batch processing.
-    - Successfully processed 34 songs in initial test runs.
+    - Parallelized song version processing (3 threads per song) for 3x speedup.
+    - Implemented robust outlier detection for data quality assurance.
+    - Optimized download strategy using low-bitrate audio and 40m duration limits.
+    - Cleaned up TUI with consolidated `tqdm` progress monitoring.
+    - Successfully completed test runs; transitioning to full catalog processing.

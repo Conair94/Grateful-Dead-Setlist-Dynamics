@@ -1,0 +1,774 @@
+[
+    {
+        "song_title": "It Hurts Me Too",
+        "timestamp": "2026-03-12 23:20:46",
+        "reasons": [
+            "BPM Variance: 23.14 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Cream Puff War",
+        "timestamp": "2026-03-12 23:21:14",
+        "reasons": [
+            "BPM Variance: 83.67 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "New Minglewood Blues",
+        "timestamp": "2026-03-12 23:22:03",
+        "reasons": [
+            "Loudness Variance: 8.04 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Tastebud",
+        "timestamp": "2026-03-12 23:22:30",
+        "reasons": [
+            "BPM Variance: 73.51 (limit 20)",
+            "Danceability Variance: 0.21 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Silver Threads And Golden Needles",
+        "timestamp": "2026-03-12 23:22:49",
+        "reasons": [
+            "Loudness Variance: 6.87 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "It's All Over Now",
+        "timestamp": "2026-03-12 23:23:23",
+        "reasons": [
+            "BPM Variance: 83.17 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Good Lovin'",
+        "timestamp": "2026-03-12 23:24:01",
+        "reasons": [
+            "BPM Variance: 31.01 (limit 20)",
+            "Loudness Variance: 6.28 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Big Boss Man",
+        "timestamp": "2026-03-12 23:24:28",
+        "reasons": [
+            "Loudness Variance: 6.55 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "He Was A Friend Of Mine",
+        "timestamp": "2026-03-12 23:25:40",
+        "reasons": [
+            "BPM Variance: 30.96 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Don't Ease Me In",
+        "timestamp": "2026-03-12 23:25:59",
+        "reasons": [
+            "Danceability Variance: 0.20 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Dancing In The Streets",
+        "timestamp": "2026-03-12 23:27:33",
+        "reasons": [
+            "Danceability Variance: 0.20 (limit 0.2)",
+            "Loudness Variance: 13.30 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Lindy",
+        "timestamp": "2026-03-12 23:27:44",
+        "reasons": [
+            "Loudness Variance: 6.66 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Smokestack Lightnin'",
+        "timestamp": "2026-03-12 23:29:17",
+        "reasons": [
+            "Danceability Variance: 0.28 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Big Boy Pete",
+        "timestamp": "2026-03-12 23:29:54",
+        "reasons": [
+            "Danceability Variance: 0.30 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Down So Long",
+        "timestamp": "2026-03-12 23:30:38",
+        "reasons": [
+            "BPM Variance: 44.96 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "There's Something On Your Mind",
+        "timestamp": "2026-03-12 23:31:03",
+        "reasons": [
+            "BPM Variance: 33.53 (limit 20)",
+            "Loudness Variance: 7.94 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "I Just Want To Make Love To You",
+        "timestamp": "2026-03-12 23:31:17",
+        "reasons": [
+            "BPM Variance: 76.12 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Betty And Dupree",
+        "timestamp": "2026-03-12 23:31:35",
+        "reasons": [
+            "BPM Variance: 90.66 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Alice D. Millionaire",
+        "timestamp": "2026-03-12 23:31:47",
+        "reasons": [
+            "BPM Variance: 27.66 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "My Own Fault",
+        "timestamp": "2026-03-12 23:32:50",
+        "reasons": [
+            "BPM Variance: 39.51 (limit 20)",
+            "Danceability Variance: 0.20 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Been Down So Long",
+        "timestamp": "2026-03-12 23:33:36",
+        "reasons": [
+            "BPM Variance: 64.67 (limit 20)",
+            "Danceability Variance: 0.30 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Deep Elem Blues",
+        "timestamp": "2026-03-12 23:34:01",
+        "reasons": [
+            "BPM Variance: 69.65 (limit 20)",
+            "Loudness Variance: 12.21 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Something On Your Mind",
+        "timestamp": "2026-03-12 23:34:23",
+        "reasons": [
+            "BPM Variance: 44.01 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Alligator",
+        "timestamp": "2026-03-12 23:36:26",
+        "reasons": [
+            "BPM Variance: 87.50 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Turn On Your Lovelight",
+        "timestamp": "2026-03-12 23:37:59",
+        "reasons": [
+            "Danceability Variance: 0.41 (limit 0.2)",
+            "Loudness Variance: 17.86 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Feedback",
+        "timestamp": "2026-03-12 23:38:35",
+        "reasons": [
+            "BPM Variance: 21.81 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Drums",
+        "timestamp": "2026-03-12 23:40:41",
+        "reasons": [
+            "BPM Variance: 41.98 (limit 20)",
+            "Loudness Variance: 20.01 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Dark Star",
+        "timestamp": "2026-03-12 23:41:41",
+        "reasons": [
+            "BPM Variance: 41.89 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "The Eleven",
+        "timestamp": "2026-03-12 23:42:55",
+        "reasons": [
+            "Loudness Variance: 7.48 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Born Cross Eyed",
+        "timestamp": "2026-03-12 23:43:20",
+        "reasons": [
+            "Loudness Variance: 7.82 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Saint Stephen",
+        "timestamp": "2026-03-12 23:44:59",
+        "reasons": [
+            "BPM Variance: 36.77 (limit 20)",
+            "Loudness Variance: 6.76 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Dark Star Jam",
+        "timestamp": "2026-03-12 23:46:18",
+        "reasons": [
+            "Loudness Variance: 10.35 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Prisoner Blues",
+        "timestamp": "2026-03-12 23:47:17",
+        "reasons": [
+            "Loudness Variance: 8.96 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Rosemary",
+        "timestamp": "2026-03-12 23:47:42",
+        "reasons": [
+            "BPM Variance: 37.80 (limit 20)",
+            "Loudness Variance: 13.81 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Dupree's Diamond Blues",
+        "timestamp": "2026-03-12 23:48:30",
+        "reasons": [
+            "Danceability Variance: 0.31 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Doin' That Rag",
+        "timestamp": "2026-03-12 23:48:56",
+        "reasons": [
+            "BPM Variance: 24.85 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Clementine",
+        "timestamp": "2026-03-12 23:49:33",
+        "reasons": [
+            "Loudness Variance: 8.37 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Drummers' Chant",
+        "timestamp": "2026-03-12 23:50:30",
+        "reasons": [
+            "Loudness Variance: 16.06 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Not Fade Away",
+        "timestamp": "2026-03-12 23:51:04",
+        "reasons": [
+            "BPM Variance: 81.24 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Playing In The Band",
+        "timestamp": "2026-03-12 23:51:43",
+        "reasons": [
+            "Loudness Variance: 7.02 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "The Other One Jam",
+        "timestamp": "2026-03-12 23:53:05",
+        "reasons": [
+            "BPM Variance: 35.09 (limit 20)",
+            "Loudness Variance: 9.62 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Hey Jude",
+        "timestamp": "2026-03-12 23:53:54",
+        "reasons": [
+            "Danceability Variance: 0.20 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "And We Bid You Good Night Jam",
+        "timestamp": "2026-03-12 23:54:05",
+        "reasons": [
+            "BPM Variance: 24.33 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Caution (Do Not Stop On Tracks) Jam",
+        "timestamp": "2026-03-12 23:54:59",
+        "reasons": [
+            "BPM Variance: 39.02 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Foxy Lady Jam",
+        "timestamp": "2026-03-12 23:55:56",
+        "reasons": [
+            "BPM Variance: 68.39 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "What's Become Of The Baby",
+        "timestamp": "2026-03-12 23:57:29",
+        "reasons": [
+            "Loudness Variance: 9.02 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "The Things I Used To Do",
+        "timestamp": "2026-03-12 23:58:41",
+        "reasons": [
+            "BPM Variance: 61.99 (limit 20)",
+            "Danceability Variance: 0.25 (limit 0.2)",
+            "Loudness Variance: 6.98 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Let It Be Me",
+        "timestamp": "2026-03-12 23:59:41",
+        "reasons": [
+            "BPM Variance: 72.90 (limit 20)",
+            "Danceability Variance: 0.23 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Mama Tried",
+        "timestamp": "2026-03-13 00:00:02",
+        "reasons": [
+            "BPM Variance: 20.22 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Cathy's Clown",
+        "timestamp": "2026-03-13 00:00:14",
+        "reasons": [
+            "Danceability Variance: 0.54 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Ol' Slewfoot",
+        "timestamp": "2026-03-13 00:00:32",
+        "reasons": [
+            "BPM Variance: 37.15 (limit 20)",
+            "Loudness Variance: 12.09 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "The Race Is On",
+        "timestamp": "2026-03-13 00:01:08",
+        "reasons": [
+            "BPM Variance: 88.82 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Wabash Cannonball",
+        "timestamp": "2026-03-13 00:01:51",
+        "reasons": [
+            "BPM Variance: 33.38 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Railroading The Great Divide",
+        "timestamp": "2026-03-13 00:02:42",
+        "reasons": [
+            "Danceability Variance: 0.28 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "High Time",
+        "timestamp": "2026-03-13 00:03:24",
+        "reasons": [
+            "BPM Variance: 102.79 (limit 20)",
+            "Loudness Variance: 8.96 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "El Paso",
+        "timestamp": "2026-03-13 00:04:21",
+        "reasons": [
+            "Danceability Variance: 0.23 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "The Story Of A Brick",
+        "timestamp": "2026-03-13 00:05:09",
+        "reasons": [
+            "BPM Variance: 21.33 (limit 20)",
+            "Loudness Variance: 9.36 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Seasons Of My Heart",
+        "timestamp": "2026-03-13 00:05:39",
+        "reasons": [
+            "BPM Variance: 46.19 (limit 20)",
+            "Loudness Variance: 7.16 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Easy Wind",
+        "timestamp": "2026-03-13 00:06:04",
+        "reasons": [
+            "BPM Variance: 90.24 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Good Lovin' Jam",
+        "timestamp": "2026-03-13 00:08:37",
+        "reasons": [
+            "BPM Variance: 72.94 (limit 20)",
+            "Danceability Variance: 0.23 (limit 0.2)",
+            "Loudness Variance: 10.49 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Peggy Sue",
+        "timestamp": "2026-03-13 00:09:04",
+        "reasons": [
+            "BPM Variance: 63.89 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Johnny B. Goode",
+        "timestamp": "2026-03-13 00:09:49",
+        "reasons": [
+            "Danceability Variance: 0.27 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Baby What You Want Me To Do",
+        "timestamp": "2026-03-13 00:10:18",
+        "reasons": [
+            "Danceability Variance: 0.23 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Wipe Out",
+        "timestamp": "2026-03-13 00:10:40",
+        "reasons": [
+            "BPM Variance: 54.99 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Big Railroad Blues",
+        "timestamp": "2026-03-13 00:11:03",
+        "reasons": [
+            "Danceability Variance: 0.30 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Twist And Shout",
+        "timestamp": "2026-03-13 00:11:46",
+        "reasons": [
+            "BPM Variance: 43.79 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Blue Moon",
+        "timestamp": "2026-03-13 00:12:16",
+        "reasons": [
+            "BPM Variance: 29.24 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Uncle John's Band Jam",
+        "timestamp": "2026-03-13 00:13:01",
+        "reasons": [
+            "Danceability Variance: 0.22 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Star Spangled Banner",
+        "timestamp": "2026-03-13 00:13:16",
+        "reasons": [
+            "BPM Variance: 20.19 (limit 20)",
+            "Loudness Variance: 15.48 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "The Main Ten Jam",
+        "timestamp": "2026-03-13 00:14:24",
+        "reasons": [
+            "BPM Variance: 67.36 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Black Peter",
+        "timestamp": "2026-03-13 00:15:04",
+        "reasons": [
+            "BPM Variance: 92.81 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Black Queen",
+        "timestamp": "2026-03-13 00:16:32",
+        "reasons": [
+            "BPM Variance: 83.50 (limit 20)",
+            "Danceability Variance: 0.28 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Little Sadie",
+        "timestamp": "2026-03-13 00:17:00",
+        "reasons": [
+            "Danceability Variance: 0.21 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Long Black Limousine",
+        "timestamp": "2026-03-13 00:17:17",
+        "reasons": [
+            "Loudness Variance: 7.76 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "I've Been All Around This World",
+        "timestamp": "2026-03-13 00:17:39",
+        "reasons": [
+            "BPM Variance: 37.16 (limit 20)",
+            "Loudness Variance: 16.90 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Mason's Children",
+        "timestamp": "2026-03-13 00:18:12",
+        "reasons": [
+            "BPM Variance: 24.22 (limit 20)",
+            "Danceability Variance: 0.36 (limit 0.2)",
+            "Loudness Variance: 7.47 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "New Speedway Boogie",
+        "timestamp": "2026-03-13 00:18:40",
+        "reasons": [
+            "Loudness Variance: 6.25 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Gathering Flowers For The Master's Bouquet",
+        "timestamp": "2026-03-13 00:19:01",
+        "reasons": [
+            "Loudness Variance: 9.35 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Old, Old House",
+        "timestamp": "2026-03-13 00:19:28",
+        "reasons": [
+            "BPM Variance: 110.90 (limit 20)",
+            "Loudness Variance: 8.39 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Katie Mae",
+        "timestamp": "2026-03-13 00:19:50",
+        "reasons": [
+            "BPM Variance: 22.65 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Dark Hollow",
+        "timestamp": "2026-03-13 00:20:11",
+        "reasons": [
+            "BPM Variance: 87.99 (limit 20)",
+            "Loudness Variance: 10.51 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Yellow Dog Story",
+        "timestamp": "2026-03-13 00:20:37",
+        "reasons": [
+            "BPM Variance: 25.31 (limit 20)",
+            "Loudness Variance: 6.93 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Wake Me Shake Me",
+        "timestamp": "2026-03-13 00:21:31",
+        "reasons": [
+            "Danceability Variance: 0.30 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Friend Of The Devil",
+        "timestamp": "2026-03-13 00:22:10",
+        "reasons": [
+            "BPM Variance: 22.92 (limit 20)",
+            "Loudness Variance: 11.39 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Candyman",
+        "timestamp": "2026-03-13 00:22:42",
+        "reasons": [
+            "Loudness Variance: 12.24 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "It's A Man's World",
+        "timestamp": "2026-03-13 00:23:21",
+        "reasons": [
+            "BPM Variance: 86.57 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Cowboy Song",
+        "timestamp": "2026-03-13 00:24:05",
+        "reasons": [
+            "Danceability Variance: 0.28 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "The Rub",
+        "timestamp": "2026-03-13 00:24:28",
+        "reasons": [
+            "BPM Variance: 90.12 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Roberta",
+        "timestamp": "2026-03-13 00:24:50",
+        "reasons": [
+            "BPM Variance: 59.11 (limit 20)",
+            "Danceability Variance: 0.33 (limit 0.2)",
+            "Loudness Variance: 18.79 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Walk Down The Street",
+        "timestamp": "2026-03-13 00:25:19",
+        "reasons": [
+            "Loudness Variance: 6.27 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Big Breasa",
+        "timestamp": "2026-03-13 00:26:52",
+        "reasons": [
+            "BPM Variance: 50.86 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Cold Jordan",
+        "timestamp": "2026-03-13 00:27:17",
+        "reasons": [
+            "BPM Variance: 82.69 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "I Don't Know You",
+        "timestamp": "2026-03-13 00:29:01",
+        "reasons": [
+            "BPM Variance: 60.47 (limit 20)",
+            "Danceability Variance: 0.22 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Last Lonely Eagle",
+        "timestamp": "2026-03-13 00:29:19",
+        "reasons": [
+            "Loudness Variance: 7.19 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Truck Drivin' Man",
+        "timestamp": "2026-03-13 00:29:35",
+        "reasons": [
+            "Danceability Variance: 0.48 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "Fair Chance To Know",
+        "timestamp": "2026-03-13 00:30:07",
+        "reasons": [
+            "BPM Variance: 25.64 (limit 20)",
+            "Loudness Variance: 9.13 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "The Frozen Logger",
+        "timestamp": "2026-03-13 00:30:37",
+        "reasons": [
+            "BPM Variance: 39.24 (limit 20)",
+            "Loudness Variance: 10.42 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Swing Low, Sweet Chariot",
+        "timestamp": "2026-03-13 00:32:07",
+        "reasons": [
+            "Loudness Variance: 8.98 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "Sugar Magnolia",
+        "timestamp": "2026-03-13 00:33:12",
+        "reasons": [
+            "Danceability Variance: 0.26 (limit 0.2)",
+            "Loudness Variance: 6.83 (limit 6.0)"
+        ]
+    },
+    {
+        "song_title": "So Sad (To Watch Good Love Go Bad)",
+        "timestamp": "2026-03-13 00:33:36",
+        "reasons": [
+            "BPM Variance: 81.94 (limit 20)",
+            "Danceability Variance: 0.37 (limit 0.2)"
+        ]
+    },
+    {
+        "song_title": "A Voice From On High",
+        "timestamp": "2026-03-13 00:34:06",
+        "reasons": [
+            "BPM Variance: 23.46 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "How Long Blues",
+        "timestamp": "2026-03-13 00:34:20",
+        "reasons": [
+            "BPM Variance: 31.32 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Tell It To Me",
+        "timestamp": "2026-03-13 00:35:05",
+        "reasons": [
+            "BPM Variance: 65.18 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "The Ballad Of Casey Jones",
+        "timestamp": "2026-03-13 00:36:08",
+        "reasons": [
+            "BPM Variance: 53.06 (limit 20)"
+        ]
+    },
+    {
+        "song_title": "Ripple",
+        "timestamp": "2026-03-13 00:36:57",
+        "reasons": [
+            "Danceability Variance: 0.36 (limit 0.2)"
+        ]
+    }
+]
