@@ -13,6 +13,9 @@ let uniqueDates = [];
 let isPlaying = false;
 let animInterval = null;
 
+// Comparative/Delta State
+let isDeltaMode = false;
+
 // Layer Groups
 let linkGroup, nodeGroup, labelGroup;
 
@@ -290,6 +293,30 @@ function initEventListeners() {
 
     const genRealistic = document.getElementById('generate-realistic-walk');
     if (genRealistic) genRealistic.addEventListener('click', () => generateSetlistWalk(true));
+
+    // --- Comparative Analysis Listeners ---
+    const deltaMode = document.getElementById('delta-mode');
+    if (deltaMode) {
+        deltaMode.addEventListener('change', (e) => {
+            isDeltaMode = e.target.checked;
+            document.getElementById('delta-controls').classList.toggle('hidden', !isDeltaMode);
+            updateGraph();
+        });
+    }
+
+    const baselinePreset = document.getElementById('baseline-preset');
+    if (baselinePreset) {
+        baselinePreset.addEventListener('change', updateGraph);
+    }
+
+    const pinNode = document.getElementById('pin-node');
+    if (pinNode) {
+        pinNode.addEventListener('change', () => {
+            if (pinNode.checked && selectedNode) {
+                simulation.alpha(0.3).restart();
+            }
+        });
+    }
 }
 
 initEventListeners();
@@ -386,16 +413,17 @@ function updateGraph() {
     const segueOnly = document.getElementById('segue-only').checked;
     const graphMode = document.getElementById('graph-mode').value;
     
-    selectedNode = null;
-    container.classed('has-selection', false);
-    document.getElementById('stats-placeholder').classList.remove('hidden');
-    document.getElementById('stats-content').classList.add('hidden');
+    // selectedNode = null; // Removing this to allow pinning across updates
+    container.classed('has-selection', !!selectedNode);
+    document.getElementById('stats-placeholder').classList.toggle('hidden', !!selectedNode);
+    document.getElementById('stats-content').classList.toggle('hidden', !selectedNode);
 
-    // Filter edges
+    // Primary View Filter (Period B)
+    let edgesB = [];
     if (timeMode === 'range') {
         const startDate = document.getElementById('start-date').value;
         const endDate = document.getElementById('end-date').value;
-        currentFilteredEdges = rawEdges.filter(e => {
+        edgesB = rawEdges.filter(e => {
             const edgeMonth = e.date.substring(0, 7);
             if (startDate && edgeMonth < startDate) return false;
             if (endDate && edgeMonth > endDate) return false;
@@ -413,47 +441,85 @@ function updateGraph() {
             const displayEl = document.getElementById('window-date-display');
             if (displayEl) displayEl.innerText = `${startD} to ${endD}`;
             
-            currentFilteredEdges = rawEdges.filter(e => {
+            edgesB = rawEdges.filter(e => {
                 const d = e.date.split('T')[0];
                 if (d < startD || d > endD) return false;
                 if (segueOnly && !e.segue) return false;
                 return true;
             });
-        } else {
-            currentFilteredEdges = [];
         }
     }
 
-    let filteredEdges = currentFilteredEdges;
+    currentFilteredEdges = edgesB;
+    let finalEdges = edgesB;
+    let baselineEdgeKeys = new Set();
+    let baselineNodeIds = new Set();
 
-    // Aggregate edges to get weights
+    // Baseline Filter (Period A) for Delta Mode
+    if (isDeltaMode) {
+        const bVal = document.getElementById('baseline-preset').value;
+        if (bVal) {
+            const [bStart, bEnd] = bVal.split('|');
+            const edgesA = rawEdges.filter(e => {
+                const edgeMonth = e.date.substring(0, 7);
+                if (bStart && edgeMonth < bStart) return false;
+                if (bEnd && edgeMonth > bEnd) return false;
+                if (segueOnly && !e.segue) return false;
+                return true;
+            });
+
+            // Mark baseline presence
+            edgesA.forEach(e => {
+                let sId = e.source, tId = e.target;
+                if (graphMode === 'detailed') {
+                    if (sId !== 'START' && sId !== 'SET_BREAK' && sId !== 'ENCORE_BREAK' && sId !== 'END') sId = `${e.set_type}_${sId}`;
+                    if (tId !== 'START' && tId !== 'SET_BREAK' && tId !== 'ENCORE_BREAK' && tId !== 'END') tId = `${e.set_type}_${tId}`;
+                }
+                baselineEdgeKeys.add(`${sId}|||${tId}`);
+                baselineNodeIds.add(sId);
+                baselineNodeIds.add(tId);
+            });
+
+            // Combine for Union View
+            const allEdgesForProcessing = [...edgesB, ...edgesA];
+            finalEdges = allEdgesForProcessing;
+        }
+    }
+
+    // Aggregate edges
     let edgeCounts = {};
     let nodeDegrees = {};
     let nodeSetStats = {};
     
-    filteredEdges.forEach(e => {
-        let sId = e.source;
-        let tId = e.target;
-
+    finalEdges.forEach(e => {
+        let sId = e.source, tId = e.target;
         if (graphMode === 'detailed') {
-            if (sId !== 'START' && sId !== 'SET_BREAK' && sId !== 'ENCORE_BREAK' && sId !== 'END') {
-                sId = `${e.set_type}_${sId}`;
-            }
-            if (tId !== 'START' && tId !== 'SET_BREAK' && tId !== 'ENCORE_BREAK' && tId !== 'END') {
-                tId = `${e.set_type}_${tId}`;
-            }
+            if (sId !== 'START' && sId !== 'SET_BREAK' && sId !== 'ENCORE_BREAK' && sId !== 'END') sId = `${e.set_type}_${sId}`;
+            if (tId !== 'START' && tId !== 'SET_BREAK' && tId !== 'ENCORE_BREAK' && tId !== 'END') tId = `${e.set_type}_${tId}`;
         }
 
         const key = sId + "|||" + tId;
         if (!edgeCounts[key]) {
-            edgeCounts[key] = { source: sId, target: tId, weight: 0, segue: e.segue, set_type: e.set_type };
+            const inB = edgesB.some(eb => {
+                let ebS = eb.source, ebT = eb.target;
+                if (graphMode === 'detailed') {
+                    if (ebS !== 'START' && ebS !== 'SET_BREAK' && ebS !== 'ENCORE_BREAK' && ebS !== 'END') ebS = `${eb.set_type}_${ebS}`;
+                    if (ebT !== 'START' && ebT !== 'SET_BREAK' && ebT !== 'ENCORE_BREAK' && ebT !== 'END') ebT = `${eb.set_type}_${ebT}`;
+                }
+                return ebS === sId && ebT === tId;
+            });
+
+            edgeCounts[key] = { 
+                source: sId, target: tId, weight: 0, segue: e.segue, 
+                set_type: e.set_type,
+                deltaStatus: isDeltaMode ? (inB ? (baselineEdgeKeys.has(key) ? 'stable' : 'added') : 'removed') : 'stable'
+            };
         }
         edgeCounts[key].weight += 1;
         
         nodeDegrees[sId] = (nodeDegrees[sId] || 0) + 1;
         nodeDegrees[tId] = (nodeDegrees[tId] || 0) + 1;
 
-        // Track Set Info for base songs
         if (e.target !== 'END' && e.target !== 'SET_BREAK' && e.target !== 'ENCORE_BREAK' && e.target !== 'START') {
             let nId = graphMode === 'detailed' ? tId : e.target;
             if (!nodeSetStats[nId]) nodeSetStats[nId] = { set1: 0, set2plus: 0, posSum: 0, posCount: 0 };
@@ -482,6 +548,14 @@ function updateGraph() {
     }
 
     let activeNodesMap = new Map();
+    const currentNodesIds = new Set(edgesB.flatMap(e => {
+        let s = e.source, t = e.target;
+        if (graphMode === 'detailed') {
+            if (s !== 'START' && s !== 'SET_BREAK' && s !== 'ENCORE_BREAK' && s !== 'END') s = `${e.set_type}_${s}`;
+            if (t !== 'START' && t !== 'SET_BREAK' && t !== 'ENCORE_BREAK' && t !== 'END') t = `${e.set_type}_${t}`;
+        }
+        return [s, t];
+    }));
     
     Object.keys(nodeDegrees).forEach(nodeId => {
         if (nodeDegrees[nodeId] > 0 || ['START', 'SET_BREAK', 'ENCORE_BREAK', 'END'].includes(nodeId)) {
@@ -503,7 +577,6 @@ function updateGraph() {
                 nodeObj.degree = nodeDegrees[nodeId] || 0;
             } else {
                 nodeObj = { ...rawNode, id: nodeId, baseId: baseId, setType: setType, degree: nodeDegrees[nodeId] || 0 };
-                
                 if (rawNode.type === 'special') {
                     nodeObj.type = 'special';
                     if (nodeId === 'START') { nodeObj.x = width * -0.5; nodeObj.y = height / 2; }
@@ -515,6 +588,8 @@ function updateGraph() {
                     nodeObj.y = height / 2 + (Math.random() - 0.5) * 20;
                 }
             }
+
+            nodeObj.deltaStatus = isDeltaMode ? (currentNodesIds.has(nodeId) ? (baselineNodeIds.has(nodeId) ? 'stable' : 'added') : 'removed') : 'stable';
 
             if (nodeObj.type !== 'special') {
                 let s1 = nodeSetStats[nodeId] ? nodeSetStats[nodeId].set1 : 0;
@@ -534,7 +609,6 @@ function updateGraph() {
                     else if (setType === 'epilogue') nodeObj.title += " (Encore)";
                 }
             }
-            
             activeNodesMap.set(nodeId, nodeObj);
         }
     });
@@ -545,7 +619,8 @@ function updateGraph() {
             source: activeNodesMap.get(e.source),
             target: activeNodesMap.get(e.target),
             weight: e.weight,
-            segue: e.segue
+            segue: e.segue,
+            deltaStatus: e.deltaStatus
         };
     }).filter(e => e.source && e.target);
 
@@ -562,10 +637,7 @@ function renderGraph() {
     const links = linkGroup.selectAll("line")
         .data(graphData.links, d => d.id);
 
-    links.exit()
-        .transition().duration(300)
-        .style("stroke-opacity", 0)
-        .remove();
+    links.exit().transition().duration(300).style("stroke-opacity", 0).remove();
 
     const linksEnter = links.enter().append("line")
         .attr("class", d => d.segue ? "link segue" : "link")
@@ -576,25 +648,26 @@ function renderGraph() {
     
     linkElements.transition().duration(300)
         .attr("stroke-width", d => Math.sqrt(d.weight) + 0.5)
-        .style("stroke-opacity", d => d.segue ? 0.8 : 0.6);
+        .style("stroke-opacity", d => d.segue ? 0.8 : 0.6)
+        .style("stroke", d => {
+            if (isDeltaMode) {
+                if (d.deltaStatus === 'added') return "#2ecc71";
+                if (d.deltaStatus === 'removed') return "#e74c3c";
+            }
+            return null;
+        });
 
     // Nodes Join
     const nodes = nodeGroup.selectAll("circle")
         .data(graphData.nodes, d => d.id);
 
-    nodes.exit()
-        .transition().duration(300)
-        .attr("r", 0)
-        .remove();
+    nodes.exit().transition().duration(300).attr("r", 0).remove();
 
     const nodesEnter = nodes.enter().append("circle")
         .attr("class", d => d.type === 'special' ? 'node node-special' : 'node node-song')
         .attr("id", d => `node-${d.id.replace(/[^a-zA-Z0-9]/g, '_')}`)
         .attr("r", 0)
-        .call(d3.drag()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended))
+        .call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended))
         .on("click", (event, d) => {
             event.stopPropagation();
             showStats(d);
@@ -614,10 +687,7 @@ function renderGraph() {
     const labels = labelGroup.selectAll("text")
         .data(graphData.nodes, d => d.id);
 
-    labels.exit()
-        .transition().duration(300)
-        .style("opacity", 0)
-        .remove();
+    labels.exit().transition().duration(300).style("opacity", 0).remove();
 
     const labelsEnter = labels.enter().append("text")
         .attr("class", d => d.type === 'special' ? 'special-label' : 'node-label')
@@ -659,13 +729,14 @@ function updateNodeColors() {
     const graphModeEl = document.getElementById('graph-mode');
     const graphMode = graphModeEl ? graphModeEl.value : 'detailed';
     
-    // Set 1 / Start = Red
-    // Set 2 / End = Blue
-    // Middle = Purple
     const r1=255, g1=77, b1=77;
     const r2=77, g2=166, b2=255;
 
     nodeElements.style("fill", d => {
+        if (isDeltaMode) {
+            if (d.deltaStatus === 'added') return "#2ecc71";
+            if (d.deltaStatus === 'removed') return "#e74c3c";
+        }
         if (colorMode === 'set-probability') {
             if (d.type === 'special') {
                 if (d.id === 'START') return `rgb(${r1},${g1},${b1})`; 
@@ -685,6 +756,12 @@ function updateNodeColors() {
         }
         if (d.type === 'special') return null; 
         return null; 
+    }).style("stroke", d => {
+        if (isDeltaMode) {
+            if (d.deltaStatus === 'added') return "#27ae60";
+            if (d.deltaStatus === 'removed') return "#c0392b";
+        }
+        return null;
     });
 }
 
@@ -702,6 +779,17 @@ function ticked() {
     labelElements
         .attr("x", d => d.x)
         .attr("y", d => d.y);
+
+    // Camera Tracking (Pinning)
+    const pinCheckbox = document.getElementById('pin-node');
+    if (pinCheckbox && pinCheckbox.checked && selectedNode) {
+        const t = d3.zoomTransform(svg.node());
+        const targetX = width / 2;
+        const targetY = height / 2;
+        const newTx = targetX - t.k * selectedNode.x;
+        const newTy = targetY - t.k * selectedNode.y;
+        svg.call(zoom.transform, d3.zoomIdentity.translate(newTx, newTy).scale(t.k));
+    }
 }
 
 function dragstarted(event, d) {
@@ -729,6 +817,7 @@ function dragended(event, d) {
 
 function clearSelection() {
     selectedNode = null;
+    document.getElementById('pin-node').checked = false;
     document.getElementById('stats-placeholder').classList.remove('hidden');
     document.getElementById('stats-content').classList.add('hidden');
     
@@ -779,7 +868,7 @@ function showStats(nodeData) {
     container.classed('has-selection', true); 
     
     nodeElements.classed('selected', false).classed('connected', false);
-    linkElements.classed('connected', false).classed('walk-active', false).style("stroke", null);
+    linkElements.classed('connected', false).classed('walk-active', false);
     labelElements.classed('connected', false);
     container.selectAll(".walker").remove();
 
