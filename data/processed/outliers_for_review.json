@@ -236,5 +236,86 @@
             "Grateful Dead - Quinn the Eskimo",
             "Quinn The Eskimo - Grateful Dead - 10-3-1987 - Shoreline, Mountain View, CA (set2-11)"
         ]
+    },
+    {
+        "song_title": "The Times They Are A Changin'",
+        "timestamp": "2026-03-13 15:02:31",
+        "reasons": [
+            "BPM Variance: 78.46 (limit 60)"
+        ],
+        "version_titles": [
+            "A Complete Unknown (2025) 4K - \"The Times They Are A-Changin\" Scene",
+            "Bob Dylan - The Times They Are a-Changin'  (Live in England, 1965)",
+            "Bob Dylan, The Times They Are A-Changin', 1976 (video)"
+        ]
+    },
+    {
+        "song_title": "John Brown",
+        "timestamp": "2026-03-13 15:03:23",
+        "reasons": [
+            "BPM Variance: 77.11 (limit 60)"
+        ],
+        "version_titles": [
+            "\"John Brown\" - Grateful Dead & Guest  7/4/87",
+            "Bob Dylan,John Brown, Grateful Dead ,12th July 1987"
+        ]
+    },
+    {
+        "song_title": "I Want You",
+        "timestamp": "2026-03-13 15:03:37",
+        "reasons": [
+            "Danceability Variance: 0.47 (limit 0.4)"
+        ],
+        "version_titles": [
+            "\"I Want You\" - Grateful Dead & Guest 7/4/87",
+            "Bob Dylan and the Grateful Dead - I Want You (Live 1987)"
+        ]
+    },
+    {
+        "song_title": "Gotta Serve Somebody",
+        "timestamp": "2026-03-13 15:08:45",
+        "reasons": [
+            "Danceability Variance: 0.46 (limit 0.4)"
+        ],
+        "version_titles": [
+            "Grateful Dead - Gotta Serve Somebody (7-10-1987 at John F Kennedy Stadium)",
+            "Scott Guberman & Friends, 'Gotta Serve Somebody,' Ashkenaz Grateful Dead Night, Nov. 29, 2023",
+            "Bob Dylan & the Grateful Dead - Gotta Serve Somebody"
+        ]
+    },
+    {
+        "song_title": "Victim Or The Crime",
+        "timestamp": "2026-03-13 15:14:57",
+        "reasons": [
+            "BPM Variance: 74.49 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead - Victim or the Crime - 10 15 89 - Meadowlands",
+            "Victim or The Crime (2 cam) - Grateful Dead - 10-8-1989 Hampton, Va set2-03",
+            "Victim or The Crime - Grateful Dead - 7-19-1989 Alpine Valley Theatre, Wisc. set1-06"
+        ]
+    },
+    {
+        "song_title": "Every Time You Go Away",
+        "timestamp": "2026-03-13 15:19:28",
+        "reasons": [
+            "BPM Variance: 81.17 (limit 60)"
+        ],
+        "version_titles": [
+            "Paul Young & George Michael - Every Time You Go Away (The Prince's Trust Rock Gala 1986)",
+            "Paul Young - Every Time You Go Away (Live from Top of the Pops: Christmas Special, 1985)",
+            "Paul Young - Everytime You Go Away (Live Aid 1985)"
+        ]
+    },
+    {
+        "song_title": "The Last Time",
+        "timestamp": "2026-03-13 15:22:58",
+        "reasons": [
+            "BPM Variance: 96.31 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead - The Last Time - [1080p Remaster]  October 1, 1994 - Boston Garden - Boston, MA",
+            "Grateful Dead - The Last Time/We Bid You Goodnight (Live at Sullivan Stadium, Foxboro, MA, 7/14/90)"
+        ]
     }
 ]
