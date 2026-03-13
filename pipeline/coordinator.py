@@ -70,13 +70,18 @@ def process_single_version(video, song_title, temp_dir):
     
     return None
 
-def log_outlier(song_title, reasons, output_dir="data/processed"):
+def log_outlier(song_title, reasons, version_metadata, output_dir="data/processed"):
     """Log flagged songs to a central review file."""
     log_path = os.path.join(output_dir, "outliers_for_review.json")
+    
+    # Extract titles for easier review
+    version_titles = [v.get('title', 'Unknown Title') for v in version_metadata]
+    
     entry = {
         "song_title": song_title,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "reasons": reasons
+        "reasons": reasons,
+        "version_titles": version_titles
     }
     
     data = []
@@ -164,7 +169,7 @@ def process_song_pipeline(song_title, artist="Grateful Dead", top_n=3, temp_dir=
         }
         
         if outlier_reasons:
-            log_outlier(song_title, outlier_reasons, output_dir)
+            log_outlier(song_title, outlier_reasons, version_metadata, output_dir)
         
         with open(output_path, 'w') as f:
             json.dump(final_data, f, indent=4)
