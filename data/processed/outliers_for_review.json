@@ -200,5 +200,41 @@
             "Grateful Dead - Keep Your Day Job - September 20, 1982",
             "Grateful Dead - Keep Your Day Job (8-29-1982 at Seattle Center Coliseum)"
         ]
+    },
+    {
+        "song_title": "Why Don't We Do It In The Road",
+        "timestamp": "2026-03-13 12:25:01",
+        "reasons": [
+            "BPM Variance: 80.28 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead - Why Don't We Do It In the Road",
+            "Grateful Dead - Why Don't We Do It In The Road? 4/7/1985",
+            "Grateful Dead 4-13-85 Why Don't We Do it in the Road/ Bertha/ Jack Straw"
+        ]
+    },
+    {
+        "song_title": "Down In The Bottom",
+        "timestamp": "2026-03-13 12:26:17",
+        "reasons": [
+            "Danceability Variance: 0.46 (limit 0.4)"
+        ],
+        "version_titles": [
+            "Grateful Dead ~ 05 Down In The Bottom + ~ 12-28-1984 Live at SF Civic Auditorium, San Francisco, CA",
+            "Grateful Dead -  Down in the Bottom * I Ain't Superstitious",
+            "Grateful Dead - Philly Spectrum - Down in the Bottom - I aint Superstitious  4-8-85"
+        ]
+    },
+    {
+        "song_title": "The Mighty Quinn (Quinn The Eskimo)",
+        "timestamp": "2026-03-13 12:28:50",
+        "reasons": [
+            "BPM Variance: 75.19 (limit 60)"
+        ],
+        "version_titles": [
+            "Grateful Dead perform \"Quinn the Eskimo\" 9-19-90 MSG",
+            "Grateful Dead - Quinn the Eskimo",
+            "Quinn The Eskimo - Grateful Dead - 10-3-1987 - Shoreline, Mountain View, CA (set2-11)"
+        ]
     }
 ]
