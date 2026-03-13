@@ -22,20 +22,30 @@ This document tracks the progress, goals, and organizational structure of the ma
 
 ### Phase 1: Foundation & Analytics
 - [ ] **Grateful Dead Analytics:** Further work on existing data to deepen baseline insights.
+- [ ] **Cross-Band Data Acquisition:** Scrape setlist data for secondary bands (Phish, Phish.net API, Setlist.fm etc.) to enable comparative analysis.
 - [ ] **Website Expansion:** Redesign the current interface to allow for interactive data exploration and user engagement.
 
 ### Phase 2: Data Engineering (The Pipeline)
 - [ ] **Audio Extraction Pipeline:**
     - [ ] Integrate YouTube search functionality to locate specific performances.
     - [ ] Implement a temporary file management module for processing.
+    - [ ] Average songs from different performances to set a baseline.
+    - [ ] Handle edge cases for when performance doesn't exist
 - [ ] **Feature Engineering:** 
     - [ ] Build a mood processing pipeline using **Essentia** to extract high-level feature vectors from audio.
+    - [ ] **Era-Normalization:** Develop methods to distinguish between "performance mood" and "recording quality/production style" across decades.
 
 ### Phase 3: Modeling & Generation
 - [ ] **Comparison Framework:** Develop methods to compare fingerprints between bands/eras.
+- [ ] **Setlist Mood Visualization:** Create "Energy Curves" or "Mood Arcs" to visualize the emotional trajectory of a full concert.
 - [ ] **Setlist Generator:** Implement the generative model (Style XYZ for Band ABC).
 
-### Phase 4: Synthesis
+### Phase 4: Synthesis & Publication
+- [ ] **Research Questions:**
+    - [ ] **Song Evolution:** Does the "fingerprint" of a specific song (e.g., "Dark Star") fundamentally change over different eras (1969 vs. 1974 vs. 1990)?
+    - [ ] **The "Magic" Variable:** Can we quantitatively isolate the "spark" of highly-rated shows vs. average ones?
+- [ ] **Validation:** Perform "Turing Tests" for setlists—have experts/community members rate generated vs. authentic setlists.
+- [ ] **Paper Drafting:** Prepare manuscripts for SWPACA and ISMIR based on synthesized findings.
 - [ ] **Final Synthesis:** Consolidate findings and package the project into a finished research artifact.
 
 ---
