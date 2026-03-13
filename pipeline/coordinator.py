@@ -100,11 +100,10 @@ def check_for_outliers(version_metadata):
         return None
         
     outlier_reasons = []
-    # Thresholds: BPM spread > 20, Danceability spread > 0.2, Loudness spread > 6dB
+    # Thresholds: BPM spread > 20, Danceability spread > 0.2
     keys_to_check = [
         ('rhythm.bpm', 20, "BPM Variance"),
-        ('rhythm.danceability', 0.2, "Danceability Variance"),
-        ('lowlevel.loudness_ebu128.integrated', 6.0, "Loudness Variance")
+        ('rhythm.danceability', 0.2, "Danceability Variance")
     ]
     
     for key, threshold, label in keys_to_check:

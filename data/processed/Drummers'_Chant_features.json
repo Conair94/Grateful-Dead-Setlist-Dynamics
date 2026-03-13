@@ -55,10 +55,8 @@
         "lowlevel.loudness_ebu128.momentary.dvar2": 2.673979878425598,
         "lowlevel.spectral_centroid.dvar2": 330850.484375
     },
-    "outlier_flag": true,
-    "outlier_reasons": [
-        "Loudness Variance: 16.06 (limit 6.0)"
-    ],
+    "outlier_flag": false,
+    "outlier_reasons": null,
     "raw_versions": [
         {
             "id": "sJhu8LC_k-s",
