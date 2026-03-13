@@ -55,15 +55,16 @@ def download_audio(video_url, output_path, temp_dir="data/temp"):
     os.makedirs(temp_dir, exist_ok=True)
     
     ydl_opts = {
-        'format': 'bestaudio/best',
+        'format': 'worstaudio/low', # Use lower quality for faster download/processing
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'wav',
-            'preferredquality': '192',
+            'preferredquality': '96', # Lower bitrate is sufficient for feature extraction
         }],
         'outtmpl': os.path.join(temp_dir, '%(id)s.%(ext)s'),
         'quiet': True,
         'no_warnings': True,
+        'match_filter': yt_dlp.utils.match_filter_func("duration < 2400"), # Limit to 40 minutes
     }
     
     try:
