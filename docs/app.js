@@ -584,8 +584,26 @@ function updateGraph() {
                     else if (nodeId === 'ENCORE_BREAK') { nodeObj.x = width * 1.5; nodeObj.y = height / 2; }
                     else if (nodeId === 'END') { nodeObj.x = width * 2.5; nodeObj.y = height / 2; }
                 } else {
-                    nodeObj.x = width / 2 + (Math.random() - 0.5) * 20;
-                    nodeObj.y = height / 2 + (Math.random() - 0.5) * 20;
+                    // Smarter Placement: Place new nodes near an existing neighbor
+                    let neighborId = null;
+                    for (const key in edgeCounts) {
+                        const edge = edgeCounts[key];
+                        if (edge.source === nodeId && oldNodesMap.has(edge.target)) {
+                            neighborId = edge.target; break;
+                        }
+                        if (edge.target === nodeId && oldNodesMap.has(edge.source)) {
+                            neighborId = edge.source; break;
+                        }
+                    }
+
+                    if (neighborId) {
+                        const neighbor = oldNodesMap.get(neighborId);
+                        nodeObj.x = neighbor.x + (Math.random() - 0.5) * 40;
+                        nodeObj.y = neighbor.y + (Math.random() - 0.5) * 40;
+                    } else {
+                        nodeObj.x = width / 2 + (Math.random() - 0.5) * 100;
+                        nodeObj.y = height / 2 + (Math.random() - 0.5) * 100;
+                    }
                 }
             }
 
@@ -633,12 +651,15 @@ function updateGraph() {
 }
 
 function renderGraph() {
+    const animSpeed = parseInt(document.getElementById('anim-speed').value) || 200;
+    const transitionDuration = isPlaying ? Math.max(50, animSpeed * 0.8) : 300;
+
     // Links Join
     const links = linkGroup.selectAll("line")
         .data(graphData.links, d => d.id);
 
     // Faster exit for smoother scrubbing
-    links.exit().transition().duration(150).style("stroke-opacity", 0).remove();
+    links.exit().transition().duration(transitionDuration * 0.5).style("stroke-opacity", 0).remove();
 
     const linksEnter = links.enter().append("line")
         .attr("class", d => d.segue ? "link segue" : "link")
@@ -648,7 +669,7 @@ function renderGraph() {
     // Update linkElements to include ALL lines in the DOM, ensuring exiting ones stay connected during fade
     linkElements = linkGroup.selectAll("line");
     
-    linksEnter.merge(links).transition().duration(isPlaying ? 100 : 300)
+    linksEnter.merge(links).transition().duration(transitionDuration)
         .attr("stroke-width", d => Math.sqrt(d.weight) + 0.5)
         .style("stroke-opacity", d => d.segue ? 0.8 : 0.6)
         .style("stroke", d => {
@@ -663,7 +684,7 @@ function renderGraph() {
     const nodes = nodeGroup.selectAll("circle")
         .data(graphData.nodes, d => d.id);
 
-    nodes.exit().transition().duration(150).attr("r", 0).remove();
+    nodes.exit().transition().duration(transitionDuration * 0.5).attr("r", 0).remove();
 
     const nodesEnter = nodes.enter().append("circle")
         .attr("class", d => d.type === 'special' ? 'node node-special' : 'node node-song')
@@ -682,7 +703,7 @@ function renderGraph() {
     
     nodesEnter.merge(nodes).select("title").text(d => d.title + " (" + d.degree + " plays)");
 
-    nodesEnter.merge(nodes).transition().duration(isPlaying ? 100 : 300)
+    nodesEnter.merge(nodes).transition().duration(transitionDuration)
         .attr("r", d => d.type === 'special' ? 12 : Math.max(3, Math.min(15, Math.sqrt(d.degree))));
 
     updateNodeColors();
@@ -691,7 +712,7 @@ function renderGraph() {
     const labels = labelGroup.selectAll("text")
         .data(graphData.nodes, d => d.id);
 
-    labels.exit().transition().duration(150).style("opacity", 0).remove();
+    labels.exit().transition().duration(transitionDuration * 0.5).style("opacity", 0).remove();
 
     const labelsEnter = labels.enter().append("text")
         .attr("class", d => d.type === 'special' ? 'special-label' : 'node-label')
@@ -704,12 +725,13 @@ function renderGraph() {
     labelElements = labelGroup.selectAll("text");
     
     labelsEnter.merge(labels).text(d => d.type === 'special' ? d.title : (d.degree > 100 ? d.title : ""))
-        .transition().duration(isPlaying ? 100 : 300)
+        .transition().duration(transitionDuration)
         .style("opacity", 1);
 
     // Simulation Update
     if (!simulation) {
         simulation = d3.forceSimulation(graphData.nodes)
+            .velocityDecay(0.5) // Increased friction for smoother transitions
             .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
             .force("charge", d3.forceManyBody().strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength))
             .force("x", d3.forceX(d => {
@@ -725,7 +747,10 @@ function renderGraph() {
     } else {
         simulation.nodes(graphData.nodes);
         simulation.force("link").links(graphData.links);
-        simulation.alpha(0.3).restart();
+        
+        // Lower alpha during play for smoother integration of new nodes
+        const alpha = isPlaying ? 0.1 : 0.3;
+        simulation.alpha(alpha).restart();
     }
 }
 
