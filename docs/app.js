@@ -731,7 +731,7 @@ function renderGraph() {
     // Simulation Update
     if (!simulation) {
         simulation = d3.forceSimulation(graphData.nodes)
-            .velocityDecay(0.5) // Increased friction for smoother transitions
+            .velocityDecay(0.7) // Highly dampened for maximum stability
             .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
             .force("charge", d3.forceManyBody().strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength))
             .force("x", d3.forceX(d => {
@@ -740,16 +740,16 @@ function renderGraph() {
                 if (d.id === 'ENCORE_BREAK') return width * 1.5;
                 if (d.id === 'END') return width * 2.5;
                 return width / 2;
-            }).strength(d => d.type === 'special' ? 0.3 : 0))
-            .force("center", d3.forceCenter(width / 2, height / 2))
+            }).strength(d => d.type === 'special' ? 0.3 : 0.05))
+            .force("y", d3.forceY(height / 2).strength(d => d.type === 'special' ? 0.3 : 0.05))
             .force("collide", d3.forceCollide().radius(d => d.type === 'special' ? 15 : Math.sqrt(d.degree) + 2))
             .on("tick", ticked);
     } else {
         simulation.nodes(graphData.nodes);
         simulation.force("link").links(graphData.links);
         
-        // Lower alpha during play for smoother integration of new nodes
-        const alpha = isPlaying ? 0.1 : 0.3;
+        // Minimal alpha during play to prevent 'jumping' center of mass
+        const alpha = isPlaying ? 0.02 : 0.2;
         simulation.alpha(alpha).restart();
     }
 }
