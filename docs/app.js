@@ -163,8 +163,10 @@ function initEventListeners() {
             isPlaying = !isPlaying;
             btnPlay.innerText = isPlaying ? "⏸ Pause" : "▶ Play";
             if (isPlaying) {
+                if (simulation) simulation.alphaTarget(0.05).restart();
                 animInterval = setInterval(stepAnimation, parseInt(document.getElementById('anim-speed').value));
             } else {
+                if (simulation) simulation.alphaTarget(0);
                 clearInterval(animInterval);
             }
         });
@@ -584,22 +586,23 @@ function updateGraph() {
                     else if (nodeId === 'ENCORE_BREAK') { nodeObj.x = width * 1.5; nodeObj.y = height / 2; }
                     else if (nodeId === 'END') { nodeObj.x = width * 2.5; nodeObj.y = height / 2; }
                 } else {
-                    // Smarter Placement: Place new nodes near an existing neighbor
-                    let neighborId = null;
+                    // Smarter Placement: Average positions of all existing neighbors
+                    let sumX = 0, sumY = 0, count = 0;
                     for (const key in edgeCounts) {
                         const edge = edgeCounts[key];
                         if (edge.source === nodeId && oldNodesMap.has(edge.target)) {
-                            neighborId = edge.target; break;
+                            const n = oldNodesMap.get(edge.target);
+                            sumX += n.x; sumY += n.y; count++;
                         }
                         if (edge.target === nodeId && oldNodesMap.has(edge.source)) {
-                            neighborId = edge.source; break;
+                            const n = oldNodesMap.get(edge.source);
+                            sumX += n.x; sumY += n.y; count++;
                         }
                     }
 
-                    if (neighborId) {
-                        const neighbor = oldNodesMap.get(neighborId);
-                        nodeObj.x = neighbor.x + (Math.random() - 0.5) * 40;
-                        nodeObj.y = neighbor.y + (Math.random() - 0.5) * 40;
+                    if (count > 0) {
+                        nodeObj.x = sumX / count + (Math.random() - 0.5) * 20;
+                        nodeObj.y = sumY / count + (Math.random() - 0.5) * 20;
                     } else {
                         nodeObj.x = width / 2 + (Math.random() - 0.5) * 100;
                         nodeObj.y = height / 2 + (Math.random() - 0.5) * 100;
@@ -731,7 +734,7 @@ function renderGraph() {
     // Simulation Update
     if (!simulation) {
         simulation = d3.forceSimulation(graphData.nodes)
-            .velocityDecay(0.7) // Highly dampened for maximum stability
+            .velocityDecay(0.8) // High damping for liquid movement
             .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
             .force("charge", d3.forceManyBody().strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength))
             .force("x", d3.forceX(d => {
@@ -748,9 +751,11 @@ function renderGraph() {
         simulation.nodes(graphData.nodes);
         simulation.force("link").links(graphData.links);
         
-        // Minimal alpha during play to prevent 'jumping' center of mass
-        const alpha = isPlaying ? 0.02 : 0.2;
-        simulation.alpha(alpha).restart();
+        // If playing, we rely on alphaTarget set in the Play button listener.
+        // If not playing, we give it a standard kick to settle manual changes.
+        if (!isPlaying) {
+            simulation.alpha(0.3).restart();
+        }
     }
 }
 
