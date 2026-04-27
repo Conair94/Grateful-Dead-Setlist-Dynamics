@@ -144,18 +144,48 @@ def process_song_pipeline(song_title, artist="Grateful Dead", top_n=3, temp_dir=
     output_filename = get_output_filename(song_title)
     output_path = os.path.join(output_dir, output_filename)
     
-    if os.path.exists(output_path):
+    # Load manual overrides if they exist
+    overrides_path = "data/manual_overrides.json"
+    manual_urls = []
+    if os.path.exists(overrides_path):
+        try:
+            with open(overrides_path, 'r') as f:
+                overrides = json.load(f)
+                manual_urls = overrides.get(song_title, [])
+        except Exception as e:
+            logging.error(f"Error loading overrides: {e}")
+
+    # If it's an override, we might want to re-process it even if it exists
+    # but for safety let's check existence first unless it's a forced run.
+    if os.path.exists(output_path) and not manual_urls:
         return "SKIPPED"
 
-    # Step 1: Search
-    results = search_youtube_live(song_title, artist, top_n)
+    # Step 1: Search or use Manual URLs
+    if manual_urls:
+        if "SKIP" in [u.upper() for u in manual_urls]:
+            logging.info(f"  ⏭ Skipping '{song_title}' (Marked as UNFINDABLE)")
+            return "SKIPPED_UNFINDABLE"
+            
+        logging.info(f"  Using {len(manual_urls)} manual overrides for '{song_title}'")
+        results = []
+        for i, url in enumerate(manual_urls):
+            # Create a mock video object - let download_audio handle the real ID extraction
+            results.append({
+                'id': f"manual_{hash(url) % 1000000}", 
+                'title': f"Manual Override: {song_title}",
+                'link': url,
+                'viewCount': 0
+            })
+    else:
+        results = search_youtube_live(song_title, artist, top_n)
+        
     if not results:
         return None
         
     version_metadata = []
     
     # Step 2: Download & Extract (Parallelized)
-    with concurrent.futures.ThreadPoolExecutor(max_workers=top_n) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max(len(results), 1)) as executor:
         future_to_video = {executor.submit(process_single_version, v, song_title, temp_dir): v for v in results}
         
         for future in concurrent.futures.as_completed(future_to_video):
