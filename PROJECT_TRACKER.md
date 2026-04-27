@@ -32,18 +32,17 @@ This document tracks the progress, goals, and organizational structure of the ma
 ### Phase 2: Data Engineering (The Pipeline)
 *   **Audio Extraction Pipeline:**
     *   [x] **Search Strategy:** Use YouTube to find "Song Name + Artist + Live".
-    *   [x] **Fallback Logic:** If primary search fails, fall back to "Song Name + Live" to ensure at least 3 versions are found.
     *   [x] **Fetch Logic:** Implement a download module (using `yt-dlp`) for temporary audio extraction.
-        *   **Optimization:** Configured to download low-bitrate audio for faster processing.
-        *   **Safety:** Added 40-minute duration limit to avoid accidental compilation downloads.
     *   [x] **Popularity Filtering:** Fetch the 3 most popular/relevant videos per song.
 *   **Feature Engineering:**
-    *   [x] **Mood Extraction:** Use **Essentia** to extract mood feature vectors (Danceability, Energy, BPM, Valence/Mood, Loudness).
-    *   [x] **Ensemble Averaging:** Average the feature vectors from the 3 performances to create a robust "Song Fingerprint."
-    *   [x] **Data Quality (QA):** Implemented outlier detection (BPM, Danceability, Loudness variance) with a central review log (`outliers_for_review.json`).
-    *   [x] **Storage:** Save averaged feature data and raw per-version vectors to `data/processed/` in JSON format.
-    *   **Era-Normalization:**
-        *   Develop methods to distinguish between "performance mood" and "recording quality/production style" across decades.
+    *   [x] **Mood Extraction:** Use **Essentia** to extract mood feature vectors.
+    *   [x] **Ensemble Averaging:** Average the feature vectors from 3 performances.
+    *   [x] **Data Quality (QA):** Implemented outlier detection (BPM, Danceability).
+*   **Phase 2.5: Refinement & Normalization [NEW]**
+    *   [x] **Best 2 of 3 Logic:** Automatically discard sonic outliers to improve ensemble accuracy.
+    *   [x] **Era-Normalization:** Implemented Z-Score normalization based on 5-year buckets (1965-1995) to remove recording quality bias.
+    *   [x] **Manual Override System:** Added `manual_overrides.json` support for specific URLs (YouTube, Archive.org, SoundCloud) or marking songs as `SKIP` (unfindable).
+    *   [x] **Refinement Script:** Created `pipeline/refiner.py` to batch process the entire catalog into `data/refined/`.
 
 ### Phase 3: Modeling & Generation
 *   **Comparison Framework:**
