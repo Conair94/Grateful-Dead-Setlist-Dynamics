@@ -49,9 +49,12 @@ This document tracks the progress, goals, and organizational structure of the ma
 *   **Comparison Framework:**
     *   Develop methods to compare fingerprints between bands/eras.
 *   **Setlist Mood Visualization:**
-    *   Create "Energy Curves" or "Mood Arcs" to visualize the emotional trajectory of a full concert.
-*   **Setlist Generator:**
-    *   Implement the generative model (Style XYZ for Band ABC).
+    *   [ ] **Design & Plan Complete:** (See `research/mood_arc_viz/`)
+    *   [ ] **Implementation:** Create "Energy Curves" or "Mood Arcs" to visualize the emotional trajectory of a full concert.
+*   **Generative Modeling:**
+    *   [ ] **Energy Archetypes:** (See `research/energy_archetypes/`) Define structural shapes of shows.
+    *   [ ] **Era Verification:** (See `research/era_transitions/`) Quantitatively verify historical era boundaries.
+    *   [ ] **Setlist Generator:** Implement the generative model (Style XYZ for Band ABC).
 
 ### Phase 4: Synthesis & Publication
 *   **Research Questions:**
@@ -66,53 +69,27 @@ This document tracks the progress, goals, and organizational structure of the ma
 
 ---
 
-## 📁 Proposed Directory Structure
-
-To support the upcoming data processing pipeline and ML workflows, we will transition towards this organization:
+## 📁 Directory Structure (Updated)
 
 ```text
 /
-├── data/                   # Data storage (ignored by git where appropriate)
-│   ├── raw/                # Original datasets (like grateful_dead.db)
-│   ├── processed/          # Cleaned data and feature vectors
-│   └── temp/               # Temporary audio files for processing
-├── pipeline/               # Data processing scripts
-│   ├── audio_fetcher/      # YouTube search and download logic
-│   └── mood_extractor/     # Essentia-based feature extraction
-├── models/                 # ML models for fingerprinting and generation
-├── notebooks/              # Exploratory Data Analysis (EDA) and research notes
-├── docs/                   # Current website and documentation
-│   └── interaction/        # New interactive web features
-├── Legacy Files/           # Existing exploratory scripts and Gephi files
+├── data/                   # Data storage
+├── docs/                   # Frontend and visualization
+├── models/                 # Clustering and generative models
+├── pipeline/               # Data extraction and manifest generation
+├── research/               # NEW: Design docs, plans, and research notes
+├── Legacy Files/           # Historical reference
 └── PROJECT_TRACKER.md      # This file
 ```
 
 ---
 
-## 💡 Potential Ideas
-
-These features and research directions are under consideration for future expansion:
-
-### Visualization Enhancements
-*   **Locked Song Tracking (Song Pinning):** [IMPLEMENTING] Select a song to "pin" at the center of the view. As the timeline animates, the camera stays locked on this song, allowing you to watch its specific transition neighborhood evolve across decades.
-*   **Delta Highlighting / Era Comparison:** [IMPLEMENTING] A mode that compares two distinct time slices. Highlights "New" songs/transitions in green (introduced in Period B) and "Retired" ones in red (present in Period A but gone in Period B).
-*   **Activity Heatmap / Timeline Brush:** Replace the linear scrubber with a histogram of concert density. Users can "brush" across the histogram to select time ranges, providing immediate visual feedback on the band's touring intensity.
-*   **Setlist "Energy Curve" Overlay:** An animated line graph that follows the "Generative Walk" or a historical show, mapping the extracted Essentia mood features (BPM, Danceability, Valence) in real-time.
-
-### Research & Data
-*   **Interactive Audio Previews:** Integrate small 30-second audio clips (extracted during the pipeline phase) into the node statistics panel.
-*   **Community Annotation Layer:** Allow users to "tag" specific transitions with historical context (e.g., "The first time they went into Terrapin from a space jam").
-*   **Cross-Band Similarity Engine:** Using the mood fingerprints to find "equivalent" songs in other bands (e.g., "What is the Phish equivalent of a 1974 Eyes of the World?").
-
----
-
 ## 📈 Current Status
-*   **Current Phase:** Phase 2 (Data Engineering & Mood Extraction)
-*   **Last Update:** 2026-03-12
-*   **Active Focus:** Executing full-scale batch processing of the entire catalog.
+*   **Current Phase:** Phase 2 (Transitioning to Phase 3)
+*   **Last Update:** 2026-04-26
+*   **Active Focus:** Design and planning for Mood Arc Visualization and Energy Archetypes.
 *   **Recent Changes:** 
-    - Parallelized song version processing (3 threads per song) for 3x speedup.
-    - Implemented robust outlier detection for data quality assurance.
-    - Optimized download strategy using low-bitrate audio and 40m duration limits.
-    - Cleaned up TUI with consolidated `tqdm` progress monitoring.
-    - Successfully completed test runs; transitioning to full catalog processing.
+    - Created comprehensive design and planning docs for Mood Arc Viz, Energy Archetypes, and Era Transitions.
+    - Organized research planning into `/research/` directory.
+    - Identified key features for visualization (BPM, Energy, Danceability).
+
