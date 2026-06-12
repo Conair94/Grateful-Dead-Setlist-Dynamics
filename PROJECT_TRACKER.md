@@ -27,7 +27,7 @@ This document tracks the progress, goals, and organizational structure of the ma
     *   Scrape setlist data for secondary bands (Phish, Phish.net API, etc.) to enable comparative analysis.
 *   **Website Expansion:**
     *   [x] **Phase 1a:** Added interactive transition inspection (click predecessors/successors to see concert dates).
-    - [ ] **Phase 1b:** Redesign current interface for broader interactive data exploration.
+    *   [x] **Phase 1b:** Show Explorer page (`docs/explorer.html`): per-show setlist browser, mood arc chart, show-vs-show comparison, date deep-links, CSV export.
 
 ### Phase 2: Data Engineering (The Pipeline)
 *   **Audio Extraction Pipeline:**
@@ -48,12 +48,12 @@ This document tracks the progress, goals, and organizational structure of the ma
 *   **Comparison Framework:**
     *   Develop methods to compare fingerprints between bands/eras.
 *   **Setlist Mood Visualization:**
-    *   [ ] **Design & Plan Complete:** (See `research/mood_arc_viz/`)
-    *   [ ] **Implementation:** Create "Energy Curves" or "Mood Arcs" to visualize the emotional trajectory of a full concert.
+    *   [x] **Design & Plan Complete:** (See `research/mood_arc_viz/`)
+    *   [x] **Implementation:** Mood arcs live on the Show Explorer page (catalog-average features; per-performance features are future work, see `research/RESEARCH_AVENUES.md` B1).
 *   **Generative Modeling:**
     *   [ ] **Energy Archetypes:** (See `research/energy_archetypes/`) Define structural shapes of shows.
     *   [ ] **Era Verification:** (See `research/era_transitions/`) Quantitatively verify historical era boundaries.
-    *   [ ] **Setlist Generator:** Implement the generative model (Style XYZ for Band ABC).
+    *   [x] **Next-Song Prediction / Setlist Generator:** (See `research/next_song_prediction/` and `models/setlist_forecasting/`) Era-conditioned causal transformer + Markov/unigram baselines, trained and evaluated; era-conditioned sampling works.
 
 ### Phase 4: Synthesis & Publication
 *   **Research Questions:**
@@ -84,11 +84,18 @@ This document tracks the progress, goals, and organizational structure of the ma
 ---
 
 ## 📈 Current Status
-*   **Current Phase:** Phase 2 (Transitioning to Phase 3)
-*   **Last Update:** 2026-04-26
-*   **Active Focus:** Design and planning for Mood Arc Visualization and Energy Archetypes.
-*   **Recent Changes:** 
-    - Created comprehensive design and planning docs for Mood Arc Viz, Energy Archetypes, and Era Transitions.
-    - Organized research planning into `/research/` directory.
-    - Identified key features for visualization (BPM, Energy, Danceability).
+*   **Current Phase:** Phase 3 (Modeling & Generation)
+*   **Last Update:** 2026-06-12
+*   **Active Focus:** Next-song prediction (rotation-aware context is the top model improvement); see `research/RESEARCH_AVENUES.md` for the ranked roadmap.
+*   **Recent Changes (2026-06-12 session):**
+    - Full code audit. Fixed: O(E²) graph-update hot loop in `docs/app.js` (all-time view now renders in ~1.5s), delta-mode weight double-counting, resize-handler force bug, encore mislabeling for 2-set shows in `Processing/export_graph_data.py` (regenerated `graph_data.json`); removed stale `tmp_backup_app.js`; completed `requirements.txt`.
+    - **Show Explorer shipped** (`docs/explorer.html`): setlist browser for all 1,968 shows, mood arc chart (5 toggleable features, catalog percentiles), two-show comparison, date deep-links, per-show CSV export. Browser-verified end to end.
+    - **Setlist forecasting shipped** (`models/setlist_forecasting/`): unigram/Markov/transformer comparison under a shared eval; transformer substantially beats the Markov baseline (see `RESULTS.md`); era-conditioned generation produces idiomatic setlists.
+    - New exporter `Processing/export_show_data.py` → `docs/data/shows.json`.
+    - Wrote `research/RESEARCH_AVENUES.md` (ranked) and `research/next_song_prediction/design_doc.md`.
+*   **Known Issues / Technical Debt:**
+    - "Mood" features contain no true valence/arousal — Essentia's TF mood models were never run (avenue B2).
+    - Audio features are per-song catalog averages, not per-performance (avenue B1).
+    - 332 shows (mostly 1965–69) have no setlist rows and are silently excluded from exports (avenue B4).
+    - Filename sanitization differs between `pipeline/coordinator.py` (`/`→`_`) and `pipeline/refiner.py` (`/`→`-`); harmless today, trap for future joins on filenames.
 

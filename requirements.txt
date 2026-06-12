@@ -1,3 +1,15 @@
+# Core
 requests==2.31.0
 pandas==2.2.1
+numpy>=1.26
 networkx==3.2.1
+tqdm>=4.66
+
+# Audio pipeline (pipeline/)
+yt-dlp>=2024.3.10
+# essentia is required for pipeline/mood_extractor but is not pip-installable
+# on all platforms. See https://essentia.upf.edu/installing.html
+# essentia
+
+# Modeling (models/setlist_forecasting/)
+torch>=2.2

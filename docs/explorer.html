@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grateful Dead Show Explorer</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="explorer.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body class="light-mode">
+    <button id="mobile-menu-toggle" aria-label="Open Menu">☰</button>
+    <div id="sidebar">
+        <div class="header-row">
+            <h2>Show Explorer</h2>
+            <div class="header-buttons">
+                <button id="theme-toggle" title="Toggle Theme">☀️</button>
+                <button id="sidebar-close" class="mobile-only" aria-label="Close Menu">✕</button>
+            </div>
+        </div>
+
+        <nav class="page-nav">
+            <a href="index.html">← Transition Graph</a>
+        </nav>
+
+        <details class="ui-section">
+            <summary>ℹ️ About This Page</summary>
+            <div class="section-content" style="font-size: 0.85rem; line-height: 1.4;">
+                <p style="margin-top: 0;">Browse any of the 1,968 Grateful Dead shows with known setlists (1965–1995) and view the show's <strong>mood arc</strong> — the trajectory of energy, tempo, danceability, brightness, and dynamic range across the setlist.</p>
+                <p>Audio features were extracted with Essentia from live recordings, era-normalized to remove recording-quality bias, and plotted as <strong>catalog percentiles</strong>: 0.9 means the song is in the top 10% of the catalog for that feature.</p>
+                <p style="margin-bottom: 0;">Use <strong>Compare</strong> to overlay a second show (dashed lines), and <strong>Download CSV</strong> to take the data with you.</p>
+            </div>
+        </details>
+
+        <details open class="ui-section">
+            <summary>Find a Show</summary>
+            <div class="section-content">
+                <div class="control-group">
+                    <label for="year-select">Year</label>
+                    <select id="year-select"></select>
+                </div>
+                <div class="control-group">
+                    <label for="show-select">Show</label>
+                    <select id="show-select"></select>
+                </div>
+                <div class="control-group" style="flex-direction: row; gap: 5px;">
+                    <button id="btn-prev-show" style="width: 40px;" title="Previous show">&lt;</button>
+                    <button id="btn-random-show" style="flex-grow: 1;">🎲 Random Show</button>
+                    <button id="btn-next-show" style="width: 40px;" title="Next show">&gt;</button>
+                </div>
+            </div>
+        </details>
+
+        <details open class="ui-section">
+            <summary>Mood Arc Options</summary>
+            <div class="section-content">
+                <div class="control-group" id="feature-toggles"></div>
+                <hr style="border-color: var(--border-color); width: 100%; margin: 5px 0;">
+                <div class="control-group">
+                    <label for="compare-year-select">Compare With (dashed)</label>
+                    <select id="compare-year-select"></select>
+                    <select id="compare-show-select"></select>
+                    <button id="btn-clear-compare" style="margin-top: 4px;">Clear Comparison</button>
+                </div>
+            </div>
+        </details>
+
+        <details class="ui-section">
+            <summary>Researcher Tools</summary>
+            <div class="section-content">
+                <button id="btn-download-csv">⬇ Download Show CSV</button>
+                <p style="font-size: 0.8rem; margin: 4px 0 0 0;">Per-song rows with set, position, segue flag, raw audio features, and catalog percentiles. Full datasets are in the <a href="https://github.com/conairlockhart/Grateful-Dead-Setlist-Dynamics" target="_blank" style="color: var(--accent-color);">GitHub repo</a> under <code>data/refined/</code>.</p>
+            </div>
+        </details>
+    </div>
+    <div id="sidebar-resizer"></div>
+
+    <div id="explorer-main">
+        <div id="show-header">
+            <h1 id="show-title">Loading…</h1>
+            <p id="show-subtitle"></p>
+        </div>
+        <div id="arc-chart-container">
+            <svg id="arc-chart"></svg>
+            <div id="arc-tooltip" class="hidden"></div>
+        </div>
+        <div id="setlists-container"></div>
+    </div>
+
+    <script src="explorer.js"></script>
+</body>
+</html>

@@ -24,10 +24,22 @@ let linkGroup, nodeGroup, labelGroup;
 let repulsionStrength = -300;
 let linkDistance = 100;
 
+const SPECIAL_IDS = new Set(['START', 'SET_BREAK', 'ENCORE_BREAK', 'END']);
+
+// Resolve an edge's endpoint ids, prefixing with set_type in detailed mode
+function edgeEndpointIds(e, graphMode) {
+    let sId = e.source, tId = e.target;
+    if (graphMode === 'detailed') {
+        if (!SPECIAL_IDS.has(sId)) sId = `${e.set_type}_${sId}`;
+        if (!SPECIAL_IDS.has(tId)) tId = `${e.set_type}_${tId}`;
+    }
+    return [sId, tId];
+}
+
 // Set up SVG
 const graphContainer = document.getElementById('graph-container');
-const width = graphContainer.clientWidth;
-const height = window.innerHeight;
+let width = graphContainer.clientWidth;
+let height = window.innerHeight;
 
 svg = d3.select("#graph-container")
     .append("svg")
@@ -400,13 +412,15 @@ window.addEventListener('mouseup', () => {
 
 // Handle Window Resizing
 window.addEventListener('resize', () => {
-    const newWidth = graphContainer.clientWidth;
-    const newHeight = window.innerHeight;
-    
-    svg.attr("width", newWidth).attr("height", newHeight);
-    
+    width = graphContainer.clientWidth;
+    height = window.innerHeight;
+
+    svg.attr("width", width).attr("height", height);
+
     if (simulation) {
-        simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
+        // Re-set the positional forces so their accessors re-evaluate with the new dimensions
+        simulation.force("x", makePositionForceX());
+        simulation.force("y", makePositionForceY());
         simulation.alpha(0.3).restart();
     }
 });
@@ -458,6 +472,15 @@ function updateGraph() {
     let baselineEdgeKeys = new Set();
     let baselineNodeIds = new Set();
 
+    // Precompute Period B edge keys once so delta lookups are O(1) per edge
+    let bEdgeKeys = new Set();
+    if (isDeltaMode) {
+        edgesB.forEach(e => {
+            const [sId, tId] = edgeEndpointIds(e, graphMode);
+            bEdgeKeys.add(`${sId}|||${tId}`);
+        });
+    }
+
     // Baseline Filter (Period A) for Delta Mode
     if (isDeltaMode) {
         const bVal = document.getElementById('baseline-preset').value;
@@ -473,18 +496,20 @@ function updateGraph() {
 
             // Mark baseline presence
             edgesA.forEach(e => {
-                let sId = e.source, tId = e.target;
-                if (graphMode === 'detailed') {
-                    if (sId !== 'START' && sId !== 'SET_BREAK' && sId !== 'ENCORE_BREAK' && sId !== 'END') sId = `${e.set_type}_${sId}`;
-                    if (tId !== 'START' && tId !== 'SET_BREAK' && tId !== 'ENCORE_BREAK' && tId !== 'END') tId = `${e.set_type}_${tId}`;
-                }
+                const [sId, tId] = edgeEndpointIds(e, graphMode);
                 baselineEdgeKeys.add(`${sId}|||${tId}`);
                 baselineNodeIds.add(sId);
                 baselineNodeIds.add(tId);
             });
 
-            // Combine for Union View
-            finalEdges = [...edgesB, ...edgesA];
+            // Union view: current edges plus baseline-only ("removed") edges.
+            // Edges in both periods are NOT duplicated, so weights reflect the
+            // current period for stable/added and the baseline for removed.
+            const removedEdges = edgesA.filter(e => {
+                const [sId, tId] = edgeEndpointIds(e, graphMode);
+                return !bEdgeKeys.has(`${sId}|||${tId}`);
+            });
+            finalEdges = [...edgesB, ...removedEdges];
         }
     }
 
@@ -492,28 +517,15 @@ function updateGraph() {
     let edgeCounts = {};
     let nodeDegrees = {};
     let nodeSetStats = {};
-    
+
     finalEdges.forEach(e => {
-        let sId = e.source, tId = e.target;
-        if (graphMode === 'detailed') {
-            if (sId !== 'START' && sId !== 'SET_BREAK' && sId !== 'ENCORE_BREAK' && sId !== 'END') sId = `${e.set_type}_${sId}`;
-            if (tId !== 'START' && tId !== 'SET_BREAK' && tId !== 'ENCORE_BREAK' && tId !== 'END') tId = `${e.set_type}_${tId}`;
-        }
+        const [sId, tId] = edgeEndpointIds(e, graphMode);
 
         const key = sId + "|||" + tId;
         if (!edgeCounts[key]) {
-            // Check if this edge exists in the primary (Period B) set
-            const inB = edgesB.some(eb => {
-                let ebS = eb.source, ebT = eb.target;
-                if (graphMode === 'detailed') {
-                    if (ebS !== 'START' && ebS !== 'SET_BREAK' && ebS !== 'ENCORE_BREAK' && ebS !== 'END') ebS = `${eb.set_type}_${ebS}`;
-                    if (ebT !== 'START' && ebT !== 'SET_BREAK' && ebT !== 'ENCORE_BREAK' && ebT !== 'END') ebT = `${eb.set_type}_${ebT}`;
-                }
-                return ebS === sId && ebT === tId;
-            });
-
-            edgeCounts[key] = { 
-                source: sId, target: tId, weight: 0, segue: e.segue, 
+            const inB = !isDeltaMode || bEdgeKeys.has(key);
+            edgeCounts[key] = {
+                source: sId, target: tId, weight: 0, segue: e.segue,
                 set_type: e.set_type,
                 deltaStatus: isDeltaMode ? (inB ? (baselineEdgeKeys.has(key) ? 'stable' : 'added') : 'removed') : 'stable'
             };
@@ -551,14 +563,7 @@ function updateGraph() {
     }
 
     let activeNodesMap = new Map();
-    const currentNodesIds = new Set(edgesB.flatMap(e => {
-        let s = e.source, t = e.target;
-        if (graphMode === 'detailed') {
-            if (s !== 'START' && s !== 'SET_BREAK' && s !== 'ENCORE_BREAK' && s !== 'END') s = `${e.set_type}_${s}`;
-            if (t !== 'START' && t !== 'SET_BREAK' && t !== 'ENCORE_BREAK' && t !== 'END') t = `${e.set_type}_${t}`;
-        }
-        return [s, t];
-    }));
+    const currentNodesIds = new Set(edgesB.flatMap(e => edgeEndpointIds(e, graphMode)));
     
     Object.keys(nodeDegrees).forEach(nodeId => {
         if (nodeDegrees[nodeId] > 0 || ['START', 'SET_BREAK', 'ENCORE_BREAK', 'END'].includes(nodeId)) {
@@ -737,14 +742,8 @@ function renderGraph() {
             .velocityDecay(0.8) // High damping for liquid movement
             .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(d => d.segue ? linkDistance * 0.3 : linkDistance))
             .force("charge", d3.forceManyBody().strength(d => d.type === 'special' ? repulsionStrength * 8 : repulsionStrength))
-            .force("x", d3.forceX(d => {
-                if (d.id === 'START') return width * -0.5;
-                if (d.id === 'SET_BREAK') return width * 0.5;
-                if (d.id === 'ENCORE_BREAK') return width * 1.5;
-                if (d.id === 'END') return width * 2.5;
-                return width / 2;
-            }).strength(d => d.type === 'special' ? 0.3 : 0.05))
-            .force("y", d3.forceY(height / 2).strength(d => d.type === 'special' ? 0.3 : 0.05))
+            .force("x", makePositionForceX())
+            .force("y", makePositionForceY())
             .force("collide", d3.forceCollide().radius(d => d.type === 'special' ? 15 : Math.sqrt(d.degree) + 2))
             .on("tick", ticked);
     } else {
@@ -757,6 +756,21 @@ function renderGraph() {
             simulation.alpha(0.3).restart();
         }
     }
+}
+
+// Positional forces are rebuilt on window resize so they track the current dimensions
+function makePositionForceX() {
+    return d3.forceX(d => {
+        if (d.id === 'START') return width * -0.5;
+        if (d.id === 'SET_BREAK') return width * 0.5;
+        if (d.id === 'ENCORE_BREAK') return width * 1.5;
+        if (d.id === 'END') return width * 2.5;
+        return width / 2;
+    }).strength(d => d.type === 'special' ? 0.3 : 0.05);
+}
+
+function makePositionForceY() {
+    return d3.forceY(height / 2).strength(d => d.type === 'special' ? 0.3 : 0.05);
 }
 
 function updateNodeColors() {
@@ -971,7 +985,11 @@ function toggleTransitionDates(li, sourceNode, targetNode) {
     if (matches.length === 0) {
         dateListDiv.innerHTML = "<div>No data found</div>";
     } else {
-        dateListDiv.innerHTML = matches.map(m => `<div>${m.date.split('T')[0]}</div>`).join('');
+        // Each date deep-links into the Show Explorer for that show
+        dateListDiv.innerHTML = matches.map(m => {
+            const d = m.date.split('T')[0];
+            return `<div><a href="explorer.html#${d}" target="_blank" onclick="event.stopPropagation()" style="color: var(--accent-color); text-decoration: none;" title="Open in Show Explorer">${d} ↗</a></div>`;
+        }).join('');
     }
     dateListDiv.classList.remove('hidden');
 }

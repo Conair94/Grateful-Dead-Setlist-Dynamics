@@ -1,0 +1,168 @@
+/* Styles specific to the Show Explorer page */
+
+.page-nav a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.page-nav a:hover {
+    text-decoration: underline;
+}
+
+#explorer-main {
+    flex-grow: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#show-header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--accent-color);
+}
+
+#show-header p {
+    margin: 4px 0 0 0;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+#arc-chart-container {
+    position: relative;
+    width: 100%;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+#arc-chart {
+    display: block;
+    width: 100%;
+}
+
+#arc-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 50;
+    max-width: 260px;
+}
+
+#arc-tooltip .tt-title {
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 4px;
+}
+
+#arc-tooltip .tt-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.feature-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.feature-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+#setlists-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.setlist-column {
+    flex: 1;
+    min-width: 260px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.setlist-column h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: var(--accent-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 6px;
+}
+
+.setlist-column h4 {
+    margin: 12px 0 4px 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+}
+
+.setlist-column ol {
+    margin: 0;
+    padding-left: 24px;
+}
+
+.setlist-column li {
+    font-size: 0.9rem;
+    margin-bottom: 3px;
+}
+
+.setlist-column li .no-features {
+    opacity: 0.5;
+    font-size: 0.75rem;
+}
+
+.segue-arrow {
+    color: var(--segue-color);
+    font-weight: bold;
+}
+
+/* Axis / chart text inherits theme colors */
+#arc-chart text {
+    fill: var(--text-color);
+    font-size: 11px;
+}
+
+#arc-chart .domain,
+#arc-chart .tick line {
+    stroke: var(--border-color);
+}
+
+#arc-chart .set-divider {
+    stroke: var(--border-color);
+    stroke-dasharray: 4 4;
+}
+
+#arc-chart .set-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+    #explorer-main {
+        width: 100vw;
+        padding: 15px;
+    }
+}

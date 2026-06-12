@@ -48,3 +48,6 @@ bin/
 lib/
 share/
 include/
+
+# Model checkpoints
+models/**/*.pt
